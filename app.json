@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "SQLiteDemo",
-    "slug": "SQLiteDemo",
+    "name": "StitchCraft",
+    "slug": "stitchcraft",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "sqlitedemo",
+    "scheme": "stitchcraft",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon"
@@ -30,9 +30,13 @@
         {
           "backgroundColor": "#208AEF",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "imageWidth": 200,
+          "resizeMode": "contain"
         }
-      ]
+      ],
+      "expo-sqlite",
+      "expo-font",
+      "expo-image"
     ],
     "experiments": {
       "typedRoutes": true,
