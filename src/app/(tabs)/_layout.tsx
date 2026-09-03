@@ -1,15 +1,17 @@
+import AntDesign from "@expo/vector-icons/AntDesign";
 import Feather from "@expo/vector-icons/Feather";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Tabs, usePathname } from "expo-router";
 import { StyleSheet, View } from "react-native";
-import { useTheme } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useAppTheme } from "../../theme/ThemeProvider";
 
 const TabLayout = () => {
   const hiddenTabRoutes = ["/chat/theme"];
 
   const pathname = usePathname();
-  const theme = useTheme();
+  const { theme } = useAppTheme();
 
   const hideTabBar = hiddenTabRoutes.some((route) => pathname.includes(route));
   const insets = useSafeAreaInsets();
@@ -19,7 +21,7 @@ const TabLayout = () => {
   return (
     <Tabs
       screenOptions={{
-        tabBarShowLabel: false,
+        tabBarShowLabel: true,
         tabBarStyle: hideTabBar
           ? { display: "none" }
           : [
@@ -27,13 +29,13 @@ const TabLayout = () => {
               {
                 height: tabBarHeight,
                 paddingBottom: insets.bottom,
-                backgroundColor: theme.colors.primary,
-                borderColor: theme.colors.surfaceVariant,
+                backgroundColor: theme.colors.containerBackground,
+                borderColor: theme.colors.primary,
               },
             ],
         headerShown: false,
-        tabBarActiveTintColor: theme.colors.onPrimary,
-        tabBarInactiveTintColor: theme.colors.onSecondary,
+        tabBarActiveTintColor: theme.colors.primaryMint,
+        tabBarInactiveTintColor: theme.colors.surface,
         tabBarItemStyle: {
           paddingTop: 10,
         },
@@ -45,7 +47,7 @@ const TabLayout = () => {
               right: 0,
               top: 0,
               bottom: 0,
-              backgroundColor: theme.colors.primary,
+              backgroundColor: theme.colors.containerBackground,
               borderTopLeftRadius: 15,
               borderTopRightRadius: 15,
             }}
@@ -57,12 +59,17 @@ const TabLayout = () => {
       <Tabs.Screen
         name="home"
         options={{
+          tabBarLabel: "Home",
+          tabBarLabelStyle: {
+            fontSize: 12,
+            fontWeight: "600",
+          },
           tabBarIcon: ({ focused }) => (
             <View
               style={
                 [
                   // styles.iconContainer,
-                  // focused && { backgroundColor: theme.colors.onSecondary },
+                  // focused && { backgroundColor: theme.colors.inactiveIcon },
                 ]
               }
             >
@@ -70,49 +77,78 @@ const TabLayout = () => {
                 source={focused ? images.homeRed : images.home}
                 style={styles.img}
               /> */}
-              <Feather
-                name="book-open"
+              <AntDesign
+                name="home"
                 size={24}
                 color={
-                  focused ? theme.colors.onPrimary : theme.colors.onSecondary
+                  focused ? theme.colors.activeIcon : theme.colors.inactiveIcon
                 }
               />
             </View>
           ),
         }}
       />
-      {/* Setting Tab */}
+      {/* Customers Tab */}
       <Tabs.Screen
-        name="setting"
+        name="customers"
         options={{
+          tabBarLabel: "Customers",
+          tabBarLabelStyle: {
+            fontSize: 12,
+            fontWeight: "600",
+          },
+          tabBarIcon: ({ focused }) => (
+            <View style={[]}>
+              <FontAwesome
+                name="vcard"
+                size={24}
+                color={
+                  focused ? theme.colors.activeIcon : theme.colors.inactiveIcon
+                }
+              />
+            </View>
+          ),
+        }}
+      />
+      {/* Order Tab */}
+      <Tabs.Screen
+        name="orders"
+        options={{
+          tabBarLabel: "Orders",
+          tabBarLabelStyle: {
+            fontSize: 12,
+            fontWeight: "600",
+          },
           tabBarIcon: ({ focused }) => (
             <View style={[]}>
               <Ionicons
-                name="chatbox-outline"
+                name="shirt-outline"
                 size={24}
                 color={
-                  focused ? theme.colors.onPrimary : theme.colors.onSecondary
+                  focused ? theme.colors.activeIcon : theme.colors.inactiveIcon
                 }
               />
-              {/* <Image 
-                    source={focused ? icon.homeRed : icon.search} 
-                    style={styles.img}
-                    /> */}
             </View>
           ),
         }}
       />
-      {/* Profile Tab */}
+      {/* settings */}
+
       <Tabs.Screen
-        name="profile"
+        name="settings"
         options={{
+          tabBarLabel: "Settings",
+          tabBarLabelStyle: {
+            fontSize: 12,
+            fontWeight: "600",
+          },
           tabBarIcon: ({ focused }) => (
             <View style={[]}>
               <Feather
-                name="book-open"
+                name="settings"
                 size={24}
                 color={
-                  focused ? theme.colors.onPrimary : theme.colors.onSecondary
+                  focused ? theme.colors.activeIcon : theme.colors.inactiveIcon
                 }
               />
             </View>
@@ -132,7 +168,7 @@ const styles = StyleSheet.create({
   },
   tabBar: {
     overflow: "hidden",
-    borderTopWidth: 2,
+    borderTopWidth: 0,
     elevation: 0,
     shadowOpacity: 0,
   },

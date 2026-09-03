@@ -8,9 +8,9 @@ import React, {
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useColorScheme } from "react-native";
-
 import { darkTheme } from "./darkTheme";
 import { lightTheme } from "./lightTheme";
+import type { AppTheme } from "./theme.types";
 
 export type ThemeMode = "system" | "light" | "dark";
 
@@ -18,7 +18,7 @@ type ThemeContextType = {
   themeMode: ThemeMode;
   setThemeMode: (mode: ThemeMode) => void;
   isDark: boolean;
-  theme: typeof lightTheme;
+  theme: AppTheme;
 };
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -70,7 +70,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     (themeMode === "system" && systemColorScheme === "dark");
 
   // Select actual Paper theme
-  const theme = isDark ? darkTheme : lightTheme;
+  const theme: AppTheme = isDark ? darkTheme : lightTheme;
 
   const contextValue = useMemo(
     () => ({

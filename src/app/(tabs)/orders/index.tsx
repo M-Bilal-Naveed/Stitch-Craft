@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from "react-native";
 const index = () => {
   return (
     <View>
-      <Text>profile</Text>
+      <Text>index</Text>
     </View>
   );
 };

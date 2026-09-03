@@ -1,10 +1,10 @@
 import { Stack } from "expo-router";
 
-export default function ProfileLayout() {
+export default function OrdersLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" options={{}} />
-      <Stack.Screen name="profilepic" options={{}} />
+      {/* <Stack.Screen name="settings" options={{}} /> */}
     </Stack>
   );
 }
