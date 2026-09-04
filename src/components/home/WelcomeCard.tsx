@@ -5,6 +5,14 @@ import Typography from "../text/typography";
 
 const WelcomeCard = () => {
   const { theme } = useAppTheme();
+  const today = new Date();
+
+  const formattedDate = today.toLocaleDateString("en-US", {
+    weekday: "long",
+    day: "2-digit",
+    month: "short",
+  });
+
   return (
     <View
       style={[styles.welcomeCard, { backgroundColor: theme.colors.secondary }]}
@@ -14,7 +22,7 @@ const WelcomeCard = () => {
         style={styles.dateText}
         color={theme.colors.textMuted}
       >
-        Today • Monday, 24 Aug
+        Today • {formattedDate}
       </Typography>
       <Typography variant="h4" color={theme.colors.text}>
         Welcome back, Master!

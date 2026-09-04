@@ -6,7 +6,8 @@ import Typography from "@/components/text/typography";
 import { Metrics } from "@/constants/metrics";
 import { useAppTheme } from "@/theme";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
-import { SafeAreaView, StatusBar, StyleSheet, View } from "react-native";
+import { router } from "expo-router";
+import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function DashboardScreen() {
@@ -14,13 +15,9 @@ export default function DashboardScreen() {
   const instance = useSafeAreaInsets();
 
   return (
-    <SafeAreaView
+    <View
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor={theme.colors.secondary}
-      />
       <DashboardHeader />
 
       <WelcomeCard />
@@ -72,6 +69,7 @@ export default function DashboardScreen() {
         <ActionCard
           title="Search"
           icon={<Feather name="search" size={28} color={theme.colors.cGreen} />}
+          onPress={() => router.push("/(tabs)/customers")}
         />
 
         <ActionCard
@@ -79,9 +77,10 @@ export default function DashboardScreen() {
           icon={
             <Feather name="user-plus" size={28} color={theme.colors.cGreen} />
           }
+          onPress={() => router.replace("/(tabs)/customers/addCustomer")}
         />
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 

@@ -1,34 +1,44 @@
-import Typography from "@/components/text/typography";
+import AppInfoCard from "@/components/settings/AppInfoCard";
+import SettingsHeader from "@/components/settings/SettingsHeader";
+import ShopBanner from "@/components/settings/ShopBanner";
 import ThemeSelector from "@/components/ui/ThemeSelector";
 import { Metrics } from "@/constants/metrics";
-import { ScrollView, StyleSheet } from "react-native";
-import { useTheme } from "react-native-paper";
+import { useAppTheme } from "@/theme";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function SettingsScreen() {
-  const theme = useTheme();
-  const instance = useSafeAreaInsets();
+  const { theme } = useAppTheme();
+  const insets = useSafeAreaInsets();
 
   return (
-    <ScrollView
-      style={{
-        backgroundColor: theme.colors.background,
-        marginTop: instance.top,
-      }}
-      contentContainerStyle={styles.container}
+    <View
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
-      <Typography variant="body1" color={theme.colors.onBackground}>
-        Settings
-      </Typography>
+      <SettingsHeader />
 
-      <ThemeSelector />
-    </ScrollView>
+      <ScrollView
+        contentContainerStyle={[
+          styles.content,
+          { paddingBottom: insets.bottom + Metrics.padding.xl },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
+        <ShopBanner />
+
+        <ThemeSelector />
+
+        <AppInfoCard />
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    padding: Metrics.padding.xl,
-    gap: Metrics.gap.xxl,
+    flex: 1,
+  },
+  content: {
+    padding: Metrics.padding.lg,
   },
 });

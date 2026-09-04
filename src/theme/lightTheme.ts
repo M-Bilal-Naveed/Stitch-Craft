@@ -10,6 +10,7 @@ export const lightTheme: AppTheme = {
 
     background: "#F8FAFC",
     surface: "#FFFFFF",
+    surfaceVariant: "#EAEFE9",
 
     inputBg: "#F1F5F9",
     border: "#E2E8F0",
@@ -25,16 +26,35 @@ export const lightTheme: AppTheme = {
     textMuted: "#94A3B8",
 
     halfWhite: "#F3F7F3",
+    settingCard: "#F3F7F3",
+    settingBoarder: "#2D5A3D",
 
     containerBackground: "#1D3F33",
     activeIcon: "#88DDB1",
     inactiveIcon: "#FFFFFF",
 
-    status: {
-      pending: "#D97706",
-      inProgress: "#2563EB",
-      stitching: "#7C3AED",
-      completed: "#059669",
+    accent: {
+      Stitching: "#3B82F6",
+      Cutting: "#E11D48",
+      Pending: "#133020",
+      Ready: "#10B981",
+      Delivered: "#64748B",
+    },
+
+    accentText: {
+      Stitching: "#2563EB",
+      Cutting: "#E11D48",
+      Pending: "#133020",
+      Ready: "#059669",
+      Delivered: "#475569",
+    },
+
+    bg: {
+      Stitching: "#DBE8FA",
+      Cutting: "#FFE4E6",
+      Pending: "#EAEFE9",
+      Ready: "#D1FAE5",
+      Delivered: "#F1F5F9",
     },
   },
 };

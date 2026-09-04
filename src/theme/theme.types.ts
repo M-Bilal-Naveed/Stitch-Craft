@@ -14,16 +14,35 @@ export type AppTheme = MD3Theme & {
     text: string;
 
     halfWhite: string;
+    settingCard: string;
+    settingBoarder: string;
 
     containerBackground: string;
     activeIcon: string;
     inactiveIcon: string;
 
-    status: {
-      pending: string;
-      inProgress: string;
-      stitching: string;
-      completed: string;
+    accent: {
+      Stitching: string;
+      Cutting: string;
+      Pending: string;
+      Ready: string;
+      Delivered: string;
+    };
+
+    accentText: {
+      Stitching: string;
+      Cutting: string;
+      Pending: string;
+      Ready: string;
+      Delivered: string;
+    };
+
+    bg: {
+      Stitching: string;
+      Cutting: string;
+      Pending: string;
+      Ready: string;
+      Delivered: string;
     };
   };
 };

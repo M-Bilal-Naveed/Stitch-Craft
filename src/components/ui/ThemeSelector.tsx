@@ -1,17 +1,25 @@
 import { Metrics } from "@/constants/metrics";
 import { useAppTheme } from "@/theme";
 import { StyleSheet, View } from "react-native";
-import { SegmentedButtons, useTheme } from "react-native-paper";
+import { SegmentedButtons } from "react-native-paper";
 import Typography from "../text/typography";
 
 export default function ThemeSelector() {
-  const theme = useTheme();
+  const { theme } = useAppTheme();
 
   const { themeMode, setThemeMode } = useAppTheme();
 
   return (
-    <View style={styles.container}>
-      <Typography variant="body1" color={theme.colors.onSurface}>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: theme.colors.settingCard,
+          borderColor: theme.colors.settingBoarder,
+        },
+      ]}
+    >
+      <Typography variant="h4" color={theme.colors.onSurface}>
         Appearance
       </Typography>
 
@@ -49,5 +57,9 @@ export default function ThemeSelector() {
 const styles = StyleSheet.create({
   container: {
     gap: Metrics.gap.sm,
+    borderRadius: Metrics.radius.xl,
+    padding: Metrics.padding.lg,
+    marginBottom: Metrics.margin.lg,
+    borderWidth: 1,
   },
 });

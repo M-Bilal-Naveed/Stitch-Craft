@@ -1,9 +1,11 @@
+import AddButton from "@/components/button/AddButton";
 import { Customer, CustomerCard } from "@/components/customer/CustomerCard";
 import CustomersHeader from "@/components/customer/CustomersHeader";
 import { SearchInput } from "@/components/input/SearchInput";
 import Typography from "@/components/text/typography";
 import { Metrics } from "@/constants/metrics";
 import { useAppTheme } from "@/theme";
+import { router } from "expo-router";
 import { useState } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
 
@@ -55,6 +57,9 @@ export default function CustomersScreen() {
           }
         />
       </View>
+      <AddButton
+        onPress={() => router.navigate("/(tabs)/customers/addCustomer")}
+      />
     </View>
   );
 }
