@@ -109,6 +109,8 @@ export const Metrics = {
 
     header: 56,
     tabBar: 56,
+
+    logo: 120,
   },
 
   // ============================================================
@@ -125,6 +127,8 @@ export const Metrics = {
     iconButton: 48,
     iconButtonSmall: 40,
     iconButtonLarge: 56,
+
+    logo: 120,
   },
 
   // ============================================================

@@ -8,8 +8,8 @@ import {
 } from "@expo-google-fonts/poppins";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
+import { StatusBar } from "react-native";
 import { PaperProvider } from "react-native-paper";
 
 SplashScreen.preventAutoHideAsync();
@@ -19,7 +19,11 @@ function AppContent() {
 
   return (
     <PaperProvider theme={theme}>
-      <StatusBar style={isDark ? "light" : "dark"} />
+      <StatusBar
+        barStyle={isDark ? "light-content" : "dark-content"}
+        translucent
+        backgroundColor={theme.colors.background}
+      />
       <Stack screenOptions={{ headerShown: false }}>
         {/* <Stack.Screen name="(auth)" options={{}} /> */}
         <Stack.Screen name="(tabs)" options={{}} />

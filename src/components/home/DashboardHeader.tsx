@@ -1,15 +1,14 @@
 import { Images } from "@/constants/images";
 import { Metrics } from "@/constants/metrics";
 import { useAppTheme } from "@/theme";
-import { Image, StyleSheet, TouchableOpacity } from "react-native";
-import { Appbar } from "react-native-paper";
+import { Image, StyleSheet, View } from "react-native";
 import Typography from "../text/typography";
 
 const DashboardHeader = () => {
   const { theme } = useAppTheme();
 
   return (
-    <Appbar.Header
+    <View
       style={[
         styles.header,
         {
@@ -17,38 +16,30 @@ const DashboardHeader = () => {
         },
       ]}
     >
-      <Appbar.Content
-        title={
-          <>
-            <Typography
-              variant="caption"
-              style={styles.headerSubtitle}
-              color={theme.colors.textSecondary}
-            >
-              TAILOR MANAGER
-            </Typography>
+      <View style={styles.content}>
+        <View>
+          <Typography
+            variant="caption"
+            style={styles.headerSubtitle}
+            color={theme.colors.textSecondary}
+          >
+            TAILOR MANAGER
+          </Typography>
 
-            <Typography
-              variant="h4"
-              style={styles.headerTitle}
-              color={theme.colors.text}
-            >
-              Shop Dashboard
-            </Typography>
-          </>
-        }
-      />
+          <Typography
+            variant="h4"
+            style={styles.headerTitle}
+            color={theme.colors.text}
+          >
+            Shop Dashboard
+          </Typography>
+        </View>
 
-      <TouchableOpacity
-        style={styles.logoButton}
-        activeOpacity={0.7}
-        onPress={() => {
-          // handle press here
-        }}
-      >
-        <Image source={Images.logo} style={styles.pic} />
-      </TouchableOpacity>
-    </Appbar.Header>
+        <View style={styles.logoButton}>
+          <Image source={Images.logo} style={styles.pic} />
+        </View>
+      </View>
+    </View>
   );
 };
 
@@ -57,6 +48,13 @@ export default DashboardHeader;
 const styles = StyleSheet.create({
   header: {
     paddingHorizontal: Metrics.padding.xl,
+    paddingVertical: Metrics.padding.xl,
+  },
+
+  content: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
 
   headerSubtitle: {

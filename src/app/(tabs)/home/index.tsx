@@ -8,14 +8,13 @@ import { useAppTheme } from "@/theme";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { StyleSheet, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function DashboardScreen() {
   const { theme } = useAppTheme();
-  const instance = useSafeAreaInsets();
 
   return (
-    <View
+    <SafeAreaView
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
       <DashboardHeader />
@@ -80,7 +79,7 @@ export default function DashboardScreen() {
           onPress={() => router.replace("/(tabs)/customers/addCustomer")}
         />
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 

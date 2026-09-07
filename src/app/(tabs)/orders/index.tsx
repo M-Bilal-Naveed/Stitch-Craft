@@ -7,6 +7,7 @@ import Typography from "@/components/text/typography";
 import { Metrics } from "@/constants/metrics";
 import { useAppTheme } from "@/theme";
 import { FilterCategory } from "@/types/categories.types";
+import { router } from "expo-router";
 import { useState } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
 
@@ -114,7 +115,9 @@ export default function OrdersScreen() {
         />
       </View>
 
-      <AddButton />
+      <AddButton
+        onPress={() => router.navigate("/(tabs)/orders/createOrder")}
+      />
     </View>
   );
 }
