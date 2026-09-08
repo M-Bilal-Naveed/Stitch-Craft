@@ -1,3 +1,4 @@
+import { initializeDatabase } from "@/sql/schema";
 import { ThemeProvider, useAppTheme } from "@/theme";
 import {
   Poppins_400Regular,
@@ -8,6 +9,7 @@ import {
 } from "@expo-google-fonts/poppins";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import { SQLiteProvider } from "expo-sqlite";
 import { useEffect } from "react";
 import { StatusBar } from "react-native";
 import { PaperProvider } from "react-native-paper";
@@ -24,10 +26,12 @@ function AppContent() {
         translucent
         backgroundColor={theme.colors.background}
       />
-      <Stack screenOptions={{ headerShown: false }}>
-        {/* <Stack.Screen name="(auth)" options={{}} /> */}
-        <Stack.Screen name="(tabs)" options={{}} />
-      </Stack>
+      <SQLiteProvider databaseName="app.db" onInit={initializeDatabase}>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(auth)" options={{}} />
+          <Stack.Screen name="(tabs)" options={{}} />
+        </Stack>
+      </SQLiteProvider>
     </PaperProvider>
   );
 }

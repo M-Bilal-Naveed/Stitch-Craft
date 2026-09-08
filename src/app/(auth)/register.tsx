@@ -4,77 +4,96 @@ import { CustomTextInput } from "@/components/input/CustomTextInput";
 import Logo from "@/components/ui/Logo";
 import { Images } from "@/constants/images";
 import { Metrics } from "@/constants/metrics";
+import { useRegister } from "@/hooks/useRegister";
 import { useAppTheme } from "@/theme";
 import { router } from "expo-router";
-import { useState } from "react";
-import { Image, ScrollView, StyleSheet } from "react-native";
+import { Alert, Image, ScrollView, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function register() {
-  const [name, setName] = useState("");
-  const [password, setPassword] = useState("");
-  const [email, setEmail] = useState("");
-  const [shopName, setShopName] = useState("");
-
+export default function Register() {
   const { theme } = useAppTheme();
 
+  const { form, errors, loading, updateField, submit } = useRegister();
+
   const handleRegister = () => {
-    const customerData = { name, password, email, shopName };
-    console.log("Customer Saved:", customerData);
+    const success = submit();
+
+    if (success) {
+      Alert.alert(
+        "Registration Successful",
+        "Your account has been created successfully.",
+        [
+          {
+            text: "OK",
+            onPress: () => router.replace("/(auth)/login"),
+          },
+        ],
+      );
+    }
   };
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
+      style={[
+        styles.container,
+        {
+          backgroundColor: theme.colors.background,
+        },
+      ]}
     >
       <Logo />
+
       <Image source={Images.backgroundPic} style={styles.pic} />
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Form Inputs */}
         <CustomTextInput
-          label="Customer Name"
-          value={name}
-          onChangeText={setName}
+          label="Full Name"
+          value={form.name}
+          onChangeText={(value) => updateField("name", value)}
           placeholder="Enter full name"
           required
+          error={errors.name}
         />
 
         <CustomTextInput
           label="Shop Name"
-          value={shopName}
-          onChangeText={setShopName}
+          value={form.shopName}
+          onChangeText={(value) => updateField("shopName", value)}
           placeholder="Enter Shop Name"
           required
+          error={errors.shopName}
         />
 
         <CustomTextInput
           label="Enter Your Email"
-          value={email}
-          onChangeText={setEmail}
+          value={form.email}
+          onChangeText={(value) => updateField("email", value)}
           placeholder="Enter Your Email address"
           keyboardType="email-address"
+          required
+          error={errors.email}
         />
 
         <CustomTextInput
-          label="Address (Optional)"
-          value={password}
-          onChangeText={setPassword}
+          label="Password"
+          value={form.password}
+          onChangeText={(value) => updateField("password", value)}
           placeholder="********"
+          required
+          error={errors.password}
         />
 
-        {/* Reusable Custom Button Call */}
         <CustomButton
-          title="Register"
+          title={loading ? "Creating Account..." : "Register"}
           onPress={handleRegister}
           buttonStyle={styles.saveButtonOverride}
         />
 
         <AuthFooter
-          title="Already have have an account?"
+          title="Already have an account?"
           buttonTitle="Login"
           onPress={() => router.replace("/(auth)/login")}
         />
@@ -89,7 +108,6 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: Metrics.padding.xl,
-    // paddingBottom: 90,
   },
   saveButtonOverride: {
     marginTop: Metrics.margin.sm,

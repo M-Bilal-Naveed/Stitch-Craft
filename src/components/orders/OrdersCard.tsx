@@ -1,17 +1,12 @@
 import { Fonts } from "@/constants/fonts";
 import { Metrics } from "@/constants/metrics";
 import { useAppTheme } from "@/theme";
+import { OrderStatus } from "@/types/orderStatus";
+import { getStatusColors } from "@/utils/orderStatusColors";
 import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { Surface } from "react-native-paper";
 import Typography from "../text/typography";
-
-export type OrderStatus =
-  | "Pending"
-  | "Cutting"
-  | "Stitching"
-  | "Ready"
-  | "Delivered";
 
 export interface Order {
   id: string;
@@ -29,48 +24,7 @@ interface OrderCardProps {
 
 const OrderCard: React.FC<OrderCardProps> = ({ order, onPress }) => {
   const { theme } = useAppTheme();
-
-  // Dynamic status bar and tag colors
-  const getStatusColors = (status: OrderStatus) => {
-    switch (status) {
-      case "Stitching":
-        return {
-          accent: theme.colors.accent.Stitching,
-          text: theme.colors.accentText.Stitching,
-          bg: theme.colors.bg.Stitching,
-        };
-
-      case "Cutting":
-        return {
-          accent: theme.colors.accent.Cutting,
-          text: theme.colors.accentText.Cutting,
-          bg: theme.colors.bg.Cutting,
-        };
-
-      case "Pending":
-        return {
-          accent: theme.colors.accent.Pending,
-          text: theme.colors.accentText.Pending,
-          bg: theme.colors.bg.Pending,
-        };
-
-      case "Ready":
-        return {
-          accent: theme.colors.accent.Ready,
-          text: theme.colors.accentText.Ready,
-          bg: theme.colors.bg.Ready,
-        };
-
-      default:
-        return {
-          accent: theme.colors.accent.Delivered,
-          text: theme.colors.accentText.Delivered,
-          bg: theme.colors.bg.Delivered,
-        };
-    }
-  };
-
-  const statusColors = getStatusColors(order.status);
+  const statusColors = getStatusColors(order.status, theme);
 
   return (
     <Surface

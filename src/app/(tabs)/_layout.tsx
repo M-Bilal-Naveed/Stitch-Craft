@@ -8,7 +8,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAppTheme } from "../../theme/ThemeProvider";
 
 const TabLayout = () => {
-  const hiddenTabRoutes = ["/customers/addCustomer", "/orders/createOrder"];
+  const hiddenTabRoutes = [
+    "/customers/addCustomer",
+    "/orders/createOrder",
+    "/orders/orderDetail",
+    "/customers/customerDetail",
+    "/customers/measurements",
+  ];
 
   const pathname = usePathname();
   const { theme } = useAppTheme();

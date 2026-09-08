@@ -33,6 +33,8 @@ export const darkTheme: AppTheme = {
     activeIcon: "#A2EAC7",
     inactiveIcon: "#8F9D97",
 
+    error: "#D32F2F",
+
     accent: {
       Stitching: "#3B82F6",
       Cutting: "#E11D48",

@@ -33,6 +33,8 @@ export const lightTheme: AppTheme = {
     activeIcon: "#88DDB1",
     inactiveIcon: "#FFFFFF",
 
+    error: "#D32F2F",
+
     accent: {
       Stitching: "#3B82F6",
       Cutting: "#E11D48",

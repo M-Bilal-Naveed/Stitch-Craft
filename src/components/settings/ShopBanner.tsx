@@ -28,7 +28,7 @@ const ShopBanner: React.FC<ShopBannerProps> = ({
 
       <Typography
         variant="h4"
-        color={theme.colors.onSurfaceVariant}
+        color={theme.colors.textPrimary}
         numberOfLines={1}
       >
         {shopName}

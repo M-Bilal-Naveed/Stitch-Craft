@@ -4,7 +4,7 @@ export default function SettingsLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" options={{}} />
-      <Stack.Screen name="settings" options={{}} />
+      {/* <Stack.Screen name="settings" options={{}} /> */}
     </Stack>
   );
 }

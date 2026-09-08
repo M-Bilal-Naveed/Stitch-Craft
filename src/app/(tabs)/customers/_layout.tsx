@@ -5,6 +5,8 @@ export default function CustomersLayout() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" options={{}} />
       <Stack.Screen name="addCustomer" options={{}} />
+      <Stack.Screen name="customerDetail" options={{}} />
+      <Stack.Screen name="measurements" options={{}} />
     </Stack>
   );
 }
