@@ -8,7 +8,13 @@ import { useLogin } from "@/hooks/useLogin";
 import { useAppTheme } from "@/theme";
 import { saveToken } from "@/utils/authStorage";
 import { router } from "expo-router";
-import { Image, ScrollView, StyleSheet } from "react-native";
+import {
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Login() {
@@ -33,42 +39,49 @@ export default function Login() {
     >
       <Logo />
       <Image source={Images.backgroundPic} style={styles.pic} />
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
+
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <CustomTextInput
-          label="Email"
-          value={form.email}
-          onChangeText={(value) => updateField("email", value)}
-          placeholder="Enter Your Email"
-          keyboardType="email-address"
-          required
-          error={errors.email}
-        />
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <CustomTextInput
+            label="Email"
+            value={form.email}
+            onChangeText={(value) => updateField("email", value)}
+            placeholder="Enter Your Email"
+            keyboardType="email-address"
+            required
+            error={errors.email}
+          />
 
-        <CustomTextInput
-          label="Password"
-          value={form.password}
-          onChangeText={(value) => updateField("password", value)}
-          placeholder="********"
-          required
-          error={errors.password}
-        />
+          <CustomTextInput
+            label="Password"
+            value={form.password}
+            onChangeText={(value) => updateField("password", value)}
+            placeholder="********"
+            required
+            error={errors.password}
+          />
 
-        <CustomButton
-          title={loading ? "Logging in..." : "Login"}
-          onPress={handleLogin}
-          disabled={loading}
-          buttonStyle={styles.saveButtonOverride}
-        />
+          <CustomButton
+            title={loading ? "Logging in..." : "Login"}
+            onPress={handleLogin}
+            disabled={loading}
+            buttonStyle={styles.saveButtonOverride}
+          />
 
-        <AuthFooter
-          title="Don't have an account?"
-          buttonTitle="Register"
-          onPress={() => router.replace("/(auth)/register")}
-        />
-      </ScrollView>
+          <AuthFooter
+            title="Don't have an account?"
+            buttonTitle="Register"
+            onPress={() => router.replace("/(auth)/register")}
+          />
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

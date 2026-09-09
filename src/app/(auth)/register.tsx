@@ -8,7 +8,13 @@ import { useRegister } from "@/hooks/useRegister";
 import { useAppTheme } from "@/theme";
 import { saveToken } from "@/utils/authStorage";
 import { router } from "expo-router";
-import { Image, ScrollView, StyleSheet } from "react-native";
+import {
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Register() {
@@ -39,59 +45,65 @@ export default function Register() {
 
       <Image source={Images.backgroundPic} style={styles.pic} />
 
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <CustomTextInput
-          label="Full Name"
-          value={form.name}
-          onChangeText={(value) => updateField("name", value)}
-          placeholder="Enter full name"
-          required
-          error={errors.name}
-        />
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <CustomTextInput
+            label="Full Name"
+            value={form.name}
+            onChangeText={(value) => updateField("name", value)}
+            placeholder="Enter full name"
+            required
+            error={errors.name}
+          />
 
-        <CustomTextInput
-          label="Shop Name"
-          value={form.shopName}
-          onChangeText={(value) => updateField("shopName", value)}
-          placeholder="Enter Shop Name"
-          required
-          error={errors.shopName}
-        />
+          <CustomTextInput
+            label="Shop Name"
+            value={form.shopName}
+            onChangeText={(value) => updateField("shopName", value)}
+            placeholder="Enter Shop Name"
+            required
+            error={errors.shopName}
+          />
 
-        <CustomTextInput
-          label="Enter Your Email"
-          value={form.email}
-          onChangeText={(value) => updateField("email", value)}
-          placeholder="Enter Your Email address"
-          keyboardType="email-address"
-          required
-          error={errors.email}
-        />
+          <CustomTextInput
+            label="Enter Your Email"
+            value={form.email}
+            onChangeText={(value) => updateField("email", value)}
+            placeholder="Enter Your Email address"
+            keyboardType="email-address"
+            required
+            error={errors.email}
+          />
 
-        <CustomTextInput
-          label="Password"
-          value={form.password}
-          onChangeText={(value) => updateField("password", value)}
-          placeholder="********"
-          required
-          error={errors.password}
-        />
+          <CustomTextInput
+            label="Password"
+            value={form.password}
+            onChangeText={(value) => updateField("password", value)}
+            placeholder="********"
+            required
+            error={errors.password}
+          />
 
-        <CustomButton
-          title={loading ? "Creating Account..." : "Register"}
-          onPress={handleRegister}
-          buttonStyle={styles.saveButtonOverride}
-        />
+          <CustomButton
+            title={loading ? "Creating Account..." : "Register"}
+            onPress={handleRegister}
+            buttonStyle={styles.saveButtonOverride}
+          />
 
-        <AuthFooter
-          title="Already have an account?"
-          buttonTitle="Login"
-          onPress={() => router.replace("/(auth)/login")}
-        />
-      </ScrollView>
+          <AuthFooter
+            title="Already have an account?"
+            buttonTitle="Login"
+            onPress={() => router.replace("/(auth)/login")}
+          />
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
