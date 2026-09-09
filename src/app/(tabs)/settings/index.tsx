@@ -1,4 +1,5 @@
 import AppInfoCard from "@/components/settings/AppInfoCard";
+import LogoutBox from "@/components/settings/LogoutBox";
 import SettingsHeader from "@/components/settings/SettingsHeader";
 import ShopBanner from "@/components/settings/ShopBanner";
 import ThemeSelector from "@/components/ui/ThemeSelector";
@@ -29,6 +30,8 @@ export default function SettingsScreen() {
         <ThemeSelector />
 
         <AppInfoCard />
+
+        <LogoutBox />
       </ScrollView>
     </View>
   );

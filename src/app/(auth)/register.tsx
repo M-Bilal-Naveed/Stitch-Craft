@@ -6,8 +6,9 @@ import { Images } from "@/constants/images";
 import { Metrics } from "@/constants/metrics";
 import { useRegister } from "@/hooks/useRegister";
 import { useAppTheme } from "@/theme";
+import { saveToken } from "@/utils/authStorage";
 import { router } from "expo-router";
-import { Alert, Image, ScrollView, StyleSheet } from "react-native";
+import { Image, ScrollView, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Register() {
@@ -15,20 +16,13 @@ export default function Register() {
 
   const { form, errors, loading, updateField, submit } = useRegister();
 
-  const handleRegister = () => {
-    const success = submit();
+  const handleRegister = async () => {
+    const success = await submit();
+    const dummyToken = "StitchCraft-dummy-token";
 
     if (success) {
-      Alert.alert(
-        "Registration Successful",
-        "Your account has been created successfully.",
-        [
-          {
-            text: "OK",
-            onPress: () => router.replace("/(auth)/login"),
-          },
-        ],
-      );
+      await saveToken(dummyToken);
+      router.replace("/(tabs)/home");
     }
   };
 

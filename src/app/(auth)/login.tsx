@@ -4,21 +4,27 @@ import { CustomTextInput } from "@/components/input/CustomTextInput";
 import Logo from "@/components/ui/Logo";
 import { Images } from "@/constants/images";
 import { Metrics } from "@/constants/metrics";
+import { useLogin } from "@/hooks/useLogin";
 import { useAppTheme } from "@/theme";
+import { saveToken } from "@/utils/authStorage";
 import { router } from "expo-router";
-import { useState } from "react";
 import { Image, ScrollView, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
+export default function Login() {
   const { theme } = useAppTheme();
+  const { form, errors, loading, updateField, submit } = useLogin();
 
-  const handleLogin = () => {
-    const customerData = { email, password };
-    console.log("Customer Saved:", customerData);
+  const handleLogin = async () => {
+    if (loading) return;
+
+    const success = await submit();
+    const dummyToken = "StitchCraft-dummy-token";
+
+    if (success) {
+      await saveToken(dummyToken);
+      router.replace("/(tabs)/home");
+    }
   };
 
   return (
@@ -33,24 +39,27 @@ export default function login() {
       >
         <CustomTextInput
           label="Email"
-          value={email}
-          onChangeText={setEmail}
+          value={form.email}
+          onChangeText={(value) => updateField("email", value)}
           placeholder="Enter Your Email"
           keyboardType="email-address"
           required
+          error={errors.email}
         />
 
         <CustomTextInput
           label="Password"
-          value={password}
-          onChangeText={setPassword}
+          value={form.password}
+          onChangeText={(value) => updateField("password", value)}
           placeholder="********"
           required
+          error={errors.password}
         />
 
         <CustomButton
-          title="Login"
+          title={loading ? "Logging in..." : "Login"}
           onPress={handleLogin}
+          disabled={loading}
           buttonStyle={styles.saveButtonOverride}
         />
 
@@ -70,7 +79,6 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: Metrics.padding.xl,
-    // paddingBottom: 90,
   },
   saveButtonOverride: {
     marginTop: Metrics.margin.sm,
