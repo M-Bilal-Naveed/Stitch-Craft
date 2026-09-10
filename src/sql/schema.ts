@@ -1,14 +1,11 @@
-import { getDb } from "./database";
+import { SQLiteDatabase } from "expo-sqlite";
 
-export async function initializeDatabase() {
-  const db = await getDb();
+export async function initializeDatabase(db: SQLiteDatabase) {
+  // 1. Run PRAGMAs as single, isolated calls
+  await db.execAsync("PRAGMA foreign_keys = ON;");
+  await db.execAsync("PRAGMA journal_mode = WAL;");
 
-  // Enable Foreign Keys & Write-Ahead Logging (WAL) for concurrency
-  await db.execAsync(`
-    PRAGMA foreign_keys = ON;
-    PRAGMA journal_mode = WAL;
-  `);
-
+  // 2. Create Schema & Indexes
   await db.execAsync(`
     -- Auth Table
     CREATE TABLE IF NOT EXISTS users (
@@ -72,5 +69,9 @@ export async function initializeDatabase() {
       updated_at TEXT NOT NULL,
       FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
     );
+
+    -- Indexes for search and foreign key join speed
+    CREATE INDEX IF NOT EXISTS idx_customers_search ON customers(name, phone);
+    CREATE INDEX IF NOT EXISTS idx_orders_customer ON orders(customer_id);
   `);
 }

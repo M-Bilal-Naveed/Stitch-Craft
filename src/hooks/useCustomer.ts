@@ -22,7 +22,7 @@ export function useCustomers() {
 
   const isFetchingRef = useRef(false);
 
-  // Initial fetch / refresh
+  // Initial list fetch / Pull to refresh
   const fetchCustomers = useCallback(
     async (searchQuery: unknown = "") => {
       const queryStr = typeof searchQuery === "string" ? searchQuery : "";
@@ -36,7 +36,8 @@ export function useCustomers() {
           0,
           queryStr,
         );
-        const safeData = Array.isArray(data) ? data : [];
+        const safeData = data ?? [];
+
         setCustomers(safeData);
         setPage(1);
         setHasMore(safeData.length === PAGE_SIZE);
@@ -50,26 +51,24 @@ export function useCustomers() {
     [db],
   );
 
-  // Load next batch on scroll
+  // Load next page on scroll end
   const loadMoreCustomers = useCallback(
     async (searchQuery: unknown = "") => {
       const queryStr = typeof searchQuery === "string" ? searchQuery : "";
-
       if (isFetchingRef.current || !hasMore) return;
 
       isFetchingRef.current = true;
       setLoadingMore(true);
 
       try {
-        const currentOffset = Math.max(0, page) * PAGE_SIZE;
+        const offset = Math.max(0, page) * PAGE_SIZE;
         const newBatch = await customerRepository.getPaginatedCustomers(
           db,
           PAGE_SIZE,
-          currentOffset,
+          offset,
           queryStr,
         );
-
-        const safeBatch = Array.isArray(newBatch) ? newBatch : [];
+        const safeBatch = newBatch ?? [];
 
         if (safeBatch.length < PAGE_SIZE) {
           setHasMore(false);
@@ -89,17 +88,13 @@ export function useCustomers() {
     [db, page, hasMore],
   );
 
-  // Add customer
+  // Create a new customer profile
   const addCustomer = useCallback(
     async (input: CustomerInput): Promise<boolean> => {
       const newErrors: CustomerErrors = {};
 
-      if (!input?.name?.trim()) {
-        newErrors.name = "Customer name is required.";
-      }
-      if (!input?.phone?.trim()) {
-        newErrors.phone = "Phone number is required.";
-      }
+      if (!input?.name?.trim()) newErrors.name = "Customer name is required.";
+      if (!input?.phone?.trim()) newErrors.phone = "Phone number is required.";
 
       if (Object.keys(newErrors).length > 0) {
         setErrors(newErrors);

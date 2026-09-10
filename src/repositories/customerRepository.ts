@@ -1,26 +1,27 @@
 import { Customer, CustomerInput, Measurements } from "@/types/customer";
 import { SQLiteDatabase } from "expo-sqlite";
 
-// Helper to strictly ensure NO 'undefined' reaches SQLite native driver
-const safeStr = (val: unknown): string => {
-  if (val === null || val === undefined) return "";
-  return String(val).trim();
-};
+// Helper utilities for SQLite input formatting
+const safeStr = (val: unknown): string => String(val ?? "").trim();
 
 const safeNullableStr = (val: unknown): string | null => {
-  if (val === null || val === undefined) return null;
-  const str = String(val).trim();
+  const str = safeStr(val);
   return str.length > 0 ? str : null;
 };
 
+const safeNum = (val: unknown): number | null => {
+  if (val === undefined || val === null || val === "") return null;
+  const num = Number(val);
+  return Number.isNaN(num) ? null : num;
+};
+
 export const customerRepository = {
-  // Create customer profile safely
+  // Create customer profile safely with measurements
   async createCustomer(
     db: SQLiteDatabase,
     input: CustomerInput,
   ): Promise<number> {
     const createdAt = new Date().toISOString();
-
     const name = safeStr(input?.name);
     const phone = safeStr(input?.phone);
     const address = safeNullableStr(input?.address);
@@ -44,20 +45,13 @@ export const customerRepository = {
     return customerId;
   },
 
-  // Internal helper for measurements within transaction
+  // Internal helper for saving measurements within a transaction context
   async saveMeasurementsTxn(
     txn: any,
     customerId: number,
     m: Partial<Measurements>,
   ): Promise<void> {
-    const safeCustomerId = Number(customerId) || 0;
     const updatedAt = new Date().toISOString();
-
-    const safeNum = (val: unknown): number | null => {
-      if (val === undefined || val === null || val === "") return null;
-      const num = Number(val);
-      return isNaN(num) ? null : num;
-    };
 
     await txn.runAsync(
       `INSERT INTO measurements (
@@ -80,7 +74,7 @@ export const customerRepository = {
         notes=excluded.notes,
         updated_at=excluded.updated_at`,
       [
-        safeCustomerId,
+        Number(customerId) || 0,
         safeNum(m.kameez_length),
         safeNum(m.chest),
         safeNum(m.waist),
@@ -99,7 +93,7 @@ export const customerRepository = {
     );
   },
 
-  // Safely fetch paginated customers (guaranteed zero undefined values)
+  // Fetch paginated customer records
   async getPaginatedCustomers(
     db: SQLiteDatabase,
     limit: number = 10,
@@ -110,13 +104,13 @@ export const customerRepository = {
     const safeOffset = Math.max(0, Math.floor(Number(offset) || 0));
     const cleanSearch = safeStr(searchQuery);
 
-    if (cleanSearch.length > 0) {
-      const queryParam = `%${cleanSearch}%`;
+    if (cleanSearch) {
+      const param = `%${cleanSearch}%`;
       return await db.getAllAsync<Customer>(
         `SELECT * FROM customers 
          WHERE name LIKE ? OR phone LIKE ? 
          ORDER BY id DESC LIMIT ? OFFSET ?`,
-        [queryParam, queryParam, safeLimit, safeOffset],
+        [param, param, safeLimit, safeOffset],
       );
     }
 
