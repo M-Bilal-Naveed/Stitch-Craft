@@ -3,7 +3,9 @@ import { CustomTextArea } from "@/components/input/CustomTextArea";
 import { CustomTextInput } from "@/components/input/CustomTextInput";
 import { FeedHeader } from "@/components/ui/FeedHeader";
 import { Metrics } from "@/constants/metrics";
+import { useCustomers } from "@/hooks/useCustomer";
 import { useAppTheme } from "@/theme";
+import { router } from "expo-router";
 import { useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 
@@ -14,10 +16,31 @@ export default function AddCustomerScreen() {
   const [notes, setNotes] = useState("");
 
   const { theme } = useAppTheme();
+  const { addCustomer, loading, errors, clearFieldError } = useCustomers();
 
-  const handleSaveCustomer = () => {
-    const customerData = { name, phone, address, notes };
-    console.log("Customer Saved:", customerData);
+  const handleNameChange = (value: string) => {
+    setName(value);
+    clearFieldError("name");
+  };
+
+  const handlePhoneChange = (value: string) => {
+    setPhone(value);
+    clearFieldError("phone");
+  };
+
+  const handleSaveCustomer = async () => {
+    if (loading) return;
+
+    const success = await addCustomer({
+      name: name.trim(),
+      phone: phone.trim(),
+      address: address.trim() || undefined,
+      notes: notes.trim() || undefined,
+    });
+
+    if (success) {
+      router.back();
+    }
   };
 
   return (
@@ -30,22 +53,23 @@ export default function AddCustomerScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Form Inputs */}
         <CustomTextInput
           label="Customer Name"
           value={name}
-          onChangeText={setName}
+          onChangeText={handleNameChange}
           placeholder="Enter full name"
           required
+          error={errors.name}
         />
 
         <CustomTextInput
           label="Phone Number"
           value={phone}
-          onChangeText={setPhone}
+          onChangeText={handlePhoneChange}
           placeholder="03XX-XXXXXXX"
           keyboardType="phone-pad"
           required
+          error={errors.phone}
         />
 
         <CustomTextInput
@@ -53,6 +77,7 @@ export default function AddCustomerScreen() {
           value={address}
           onChangeText={setAddress}
           placeholder="Enter city or local address"
+          error={errors.address}
         />
 
         <CustomTextArea
@@ -62,11 +87,11 @@ export default function AddCustomerScreen() {
           placeholder="Special preferences, collar types, etc."
         />
 
-        {/* Reusable Custom Button Call */}
         <CustomButton
-          title="Save Customer"
+          title={loading ? "Saving Customer..." : "Save Customer"}
           iconName="save"
           onPress={handleSaveCustomer}
+          loading={loading}
           buttonStyle={styles.saveButtonOverride}
         />
       </ScrollView>
@@ -75,14 +100,7 @@ export default function AddCustomerScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: Metrics.padding.xl,
-    // paddingBottom: 90,
-  },
-  saveButtonOverride: {
-    marginTop: Metrics.margin.sm,
-  },
+  container: { flex: 1 },
+  scrollContent: { padding: Metrics.padding.xl },
+  saveButtonOverride: { marginTop: Metrics.margin.sm },
 });

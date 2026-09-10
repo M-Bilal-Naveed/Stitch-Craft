@@ -1,31 +1,36 @@
 import AddButton from "@/components/button/AddButton";
-import { Customer, CustomerCard } from "@/components/customer/CustomerCard";
+import { CustomerCard } from "@/components/customer/CustomerCard";
 import CustomersHeader from "@/components/customer/CustomersHeader";
 import { SearchInput } from "@/components/input/SearchInput";
 import Typography from "@/components/text/typography";
 import { Metrics } from "@/constants/metrics";
+import { useCustomers } from "@/hooks/useCustomer";
 import { useAppTheme } from "@/theme";
-import { router } from "expo-router";
-import { useState } from "react";
-import { FlatList, StyleSheet, View } from "react-native";
-
-const INITIAL_CUSTOMERS: Customer[] = [
-  { id: "1", name: "Ahmed Khan", phone: "0300-1234567" },
-  { id: "2", name: "Ali Raza", phone: "0313-7654321" },
-  { id: "3", name: "Usman Malik", phone: "0321-9876543" },
-];
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useRef, useState } from "react";
+import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
 
 export default function CustomersScreen() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [customers, setCustomers] = useState<Customer[]>(INITIAL_CUSTOMERS);
-
+  const searchRef = useRef("");
   const { theme } = useAppTheme();
 
-  // Filter customers by Name or Phone Number
-  const filteredCustomers = customers.filter(
-    (item) => item.name.toLowerCase().includes(searchQuery.toLowerCase()),
-    // item.phone.includes(searchQuery)
+  const { customers, loading, loadingMore, fetchCustomers, loadMoreCustomers } =
+    useCustomers();
+
+  // Refetch when focused without infinite loops
+  useFocusEffect(
+    useCallback(() => {
+      fetchCustomers(searchRef.current);
+    }, [fetchCustomers]),
   );
+
+  const handleSearchChange = (text: string) => {
+    const cleanText = text ?? "";
+    setSearchQuery(cleanText);
+    searchRef.current = cleanText;
+    fetchCustomers(cleanText);
+  };
 
   return (
     <View
@@ -36,27 +41,50 @@ export default function CustomersScreen() {
       <View style={styles.content}>
         <SearchInput
           value={searchQuery}
-          onChangeText={setSearchQuery}
+          onChangeText={handleSearchChange}
           placeholder="Search Customer by Name"
         />
 
         <FlatList
-          data={filteredCustomers}
-          keyExtractor={(item) => item.id}
+          data={customers}
+          keyExtractor={(item) => String(item.id)}
+          refreshing={loading}
+          onRefresh={() => fetchCustomers(searchRef.current)}
+          onEndReached={() => loadMoreCustomers(searchRef.current)}
+          onEndReachedThreshold={0.5}
           renderItem={({ item }) => (
             <CustomerCard
-              customer={item}
+              customer={{
+                id: String(item.id),
+                name: item.name,
+                phone: item.phone,
+              }}
               onPress={(selected) => console.log("Selected:", selected.name)}
             />
           )}
           showsVerticalScrollIndicator={false}
+          ListFooterComponent={
+            loadingMore ? (
+              <ActivityIndicator
+                style={styles.footerLoader}
+                color={theme.colors.primary}
+              />
+            ) : null
+          }
           ListEmptyComponent={
-            <Typography variant="h4" style={styles.emptyText}>
-              No customers found.
-            </Typography>
+            !loading ? (
+              <Typography
+                variant="h4"
+                style={styles.emptyText}
+                color={theme.colors.textPrimary}
+              >
+                No customers found.
+              </Typography>
+            ) : null
           }
         />
       </View>
+
       <AddButton
         onPress={() => router.navigate("/(tabs)/customers/addCustomer")}
       />
@@ -65,9 +93,7 @@ export default function CustomersScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1 },
   content: {
     flex: 1,
     padding: Metrics.padding.lg,
@@ -76,5 +102,8 @@ const styles = StyleSheet.create({
   emptyText: {
     textAlign: "center",
     marginTop: Metrics.margin.xxxl,
+  },
+  footerLoader: {
+    marginVertical: Metrics.margin.md,
   },
 });

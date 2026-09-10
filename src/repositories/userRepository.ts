@@ -8,7 +8,7 @@ export async function createUser(db: SQLiteDatabase, user: RegisterUserInput) {
         name,
         shop_name,
         email,
-        password,
+        password_hash,
         created_at
       )
       VALUES (?, ?, ?, ?, ?)

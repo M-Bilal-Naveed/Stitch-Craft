@@ -26,7 +26,7 @@ function AppContent() {
         translucent
         backgroundColor={theme.colors.background}
       />
-      <SQLiteProvider databaseName="app.db" onInit={initializeDatabase}>
+      <SQLiteProvider databaseName="stitchcraft.db" onInit={initializeDatabase}>
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="(auth)" options={{}} />
           <Stack.Screen name="(tabs)" options={{}} />

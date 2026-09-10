@@ -21,8 +21,8 @@ export const SearchInput: React.FC<SearchInputProps> = ({
     <View style={styles.container}>
       <Searchbar
         placeholder={placeholder}
-        onChangeText={onChangeText}
-        value={value}
+        onChangeText={(text) => onChangeText(text ?? "")}
+        value={value ?? ""}
         style={[
           styles.searchbar,
           {
