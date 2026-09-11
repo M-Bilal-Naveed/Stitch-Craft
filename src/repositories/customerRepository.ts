@@ -16,6 +16,44 @@ const safeNum = (val: unknown): number | null => {
 };
 
 export const customerRepository = {
+  // Fetch a single customer record by ID
+  async getCustomerById(
+    db: SQLiteDatabase,
+    id: number,
+  ): Promise<Customer | null> {
+    const customerId = Number(id);
+    if (!customerId || Number.isNaN(customerId)) return null;
+
+    const result = await db.getFirstAsync<Customer>(
+      `SELECT * FROM customers WHERE id = ?`,
+      [customerId],
+    );
+
+    return result ?? null;
+  },
+
+  // Fetch customer details alongside measurements
+  async getCustomerWithMeasurements(
+    db: SQLiteDatabase,
+    id: number,
+  ): Promise<{ customer: Customer; measurements: Measurements | null } | null> {
+    const customer = await this.getCustomerById(db, id);
+    if (!customer) return null;
+
+    const customerId = customer.id;
+    if (customerId === undefined) return null;
+
+    const measurements = await db.getFirstAsync<Measurements>(
+      `SELECT * FROM measurements WHERE customer_id = ?`,
+      [customerId],
+    );
+
+    return {
+      customer,
+      measurements: measurements ?? null,
+    };
+  },
+
   // Create customer profile safely with measurements
   async createCustomer(
     db: SQLiteDatabase,
@@ -43,6 +81,15 @@ export const customerRepository = {
     });
 
     return customerId;
+  },
+
+  // Standalone method to update measurements directly
+  async saveMeasurements(
+    db: SQLiteDatabase,
+    customerId: number,
+    measurements: Partial<Measurements>,
+  ): Promise<void> {
+    await this.saveMeasurementsTxn(db, customerId, measurements);
   },
 
   // Internal helper for saving measurements within a transaction context

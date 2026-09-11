@@ -1,4 +1,3 @@
-// hooks/useOrders.ts
 import { orderRepository } from "@/repositories/orderRepository";
 import { Order, OrderErrors, OrderInput } from "@/types/order";
 import { OrderStatus } from "@/types/orderStatus";
@@ -93,6 +92,32 @@ export function useOrders() {
     [db, page, hasMore],
   );
 
+  // Get single order detail by ID
+  const getOrderById = useCallback(
+    async (orderId: number): Promise<Order | null> => {
+      try {
+        return await orderRepository.getOrderById(db, orderId);
+      } catch (error) {
+        console.error("Failed to fetch order by ID:", error);
+        return null;
+      }
+    },
+    [db],
+  );
+
+  // Fetch orders by Customer ID
+  const getOrdersByCustomerId = useCallback(
+    async (customerId: number): Promise<Order[]> => {
+      try {
+        return await orderRepository.getOrdersByCustomerId(db, customerId);
+      } catch (error) {
+        console.error("Failed to fetch customer orders:", error);
+        return [];
+      }
+    },
+    [db],
+  );
+
   // Create new order
   const addOrder = useCallback(
     async (input: OrderInput): Promise<boolean> => {
@@ -149,6 +174,8 @@ export function useOrders() {
     errors,
     fetchOrders,
     loadMoreOrders,
+    getOrderById,
+    getOrdersByCustomerId,
     addOrder,
     changeOrderStatus,
     clearFieldError,

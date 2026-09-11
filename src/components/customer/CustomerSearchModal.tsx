@@ -2,20 +2,16 @@ import { SearchInput } from "@/components/input/SearchInput";
 import Typography from "@/components/text/typography";
 import { Metrics } from "@/constants/metrics";
 import { useAppTheme } from "@/theme";
+import { Customer } from "@/types/customer";
 import React, { useState } from "react";
 import {
-    FlatList,
-    Modal,
-    SafeAreaView,
-    StyleSheet,
-    TouchableOpacity,
-    View,
+  FlatList,
+  Modal,
+  SafeAreaView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from "react-native";
-
-export interface Customer {
-  id: string;
-  name: string;
-}
 
 interface CustomerSearchModalProps {
   visible: boolean;
@@ -33,9 +29,14 @@ export const CustomerSearchModal: React.FC<CustomerSearchModalProps> = ({
   const { theme } = useAppTheme();
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredCustomers = customers.filter((item) =>
-    `${item.name}`.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  const filteredCustomers = customers.filter((item) => {
+    const q = searchQuery.toLowerCase();
+    const nameMatch = item.name.toLowerCase().includes(q);
+    const phoneMatch = item.phone
+      ? item.phone.toLowerCase().includes(q)
+      : false;
+    return nameMatch || phoneMatch;
+  });
 
   const handleSelect = (customer: Customer) => {
     onSelectCustomer(customer);
@@ -55,12 +56,12 @@ export const CustomerSearchModal: React.FC<CustomerSearchModalProps> = ({
           <SearchInput
             value={searchQuery}
             onChangeText={setSearchQuery}
-            placeholder="Search customer name or ID..."
+            placeholder="Search customer name or phone..."
           />
 
           <FlatList
             data={filteredCustomers}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item) => String(item.id ?? Math.random())}
             showsVerticalScrollIndicator={false}
             renderItem={({ item }) => (
               <TouchableOpacity
@@ -70,11 +71,26 @@ export const CustomerSearchModal: React.FC<CustomerSearchModalProps> = ({
                 ]}
                 onPress={() => handleSelect(item)}
               >
-                <Typography variant="body1" color={theme.colors.textPrimary}>
-                  {item.name}
-                </Typography>
+                <View>
+                  <Typography variant="body1" color={theme.colors.textPrimary}>
+                    {item.name}
+                  </Typography>
+                  {item.phone ? (
+                    <Typography
+                      variant="caption"
+                      color={theme.colors.textMuted}
+                    >
+                      {item.phone}
+                    </Typography>
+                  ) : null}
+                </View>
               </TouchableOpacity>
             )}
+            ListEmptyComponent={
+              <Typography variant="body2" style={styles.emptyText}>
+                No matching customers found.
+              </Typography>
+            }
           />
         </View>
       </SafeAreaView>
@@ -96,5 +112,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+  },
+  emptyText: {
+    textAlign: "center",
+    marginTop: Metrics.margin.xl,
   },
 });

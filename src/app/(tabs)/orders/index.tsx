@@ -1,78 +1,73 @@
 import AddButton from "@/components/button/AddButton";
 import { SearchInput } from "@/components/input/SearchInput";
-import OrderCard, { Order } from "@/components/orders/OrdersCard";
+import OrderCard from "@/components/orders/OrdersCard";
 import OrdersHeader from "@/components/orders/OrdersHeader";
 import StatusFilter from "@/components/orders/StatusFilter";
 import Typography from "@/components/text/typography";
 import { Metrics } from "@/constants/metrics";
+import { useOrders } from "@/hooks/useOrder";
 import { useAppTheme } from "@/theme";
 import { FilterCategory } from "@/types/categories.types";
-import { router } from "expo-router";
-import { useState } from "react";
-import { FlatList, StyleSheet, View } from "react-native";
-
-const INITIAL_ORDERS: Order[] = [
-  {
-    id: "1",
-    orderNumber: "105",
-    customerName: "Ahmed Khan",
-    clothingType: "Shalwar Kameez",
-    deliveryDate: "28 Aug",
-    status: "Stitching",
-  },
-  {
-    id: "2",
-    orderNumber: "106",
-    customerName: "Ali Raza",
-    clothingType: "Waistcoat Suit",
-    deliveryDate: "30 Aug",
-    status: "Cutting",
-  },
-  {
-    id: "3",
-    orderNumber: "107",
-    customerName: "Usman Malik",
-    clothingType: "Pant Shirt",
-    deliveryDate: "02 Sep",
-    status: "Pending",
-  },
-  {
-    id: "4",
-    orderNumber: "108",
-    customerName: "Hamza Sheikh",
-    clothingType: "Kurta Pajama",
-    deliveryDate: "05 Sep",
-    status: "Ready",
-  },
-  {
-    id: "6",
-    orderNumber: "104",
-    customerName: "Ali Raza",
-    clothingType: "Pant Kot",
-    deliveryDate: "10 Sep",
-    status: "Delivered",
-  },
-];
+import { Order as DBOrder } from "@/types/order";
+import { OrderStatus } from "@/types/orderStatus";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  RefreshControl,
+  StyleSheet,
+  View,
+} from "react-native";
 
 export default function OrdersScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<FilterCategory>("All");
-  const [orders, setOrders] = useState<Order[]>(INITIAL_ORDERS);
 
   const { theme } = useAppTheme();
+  const {
+    orders,
+    loading,
+    loadingMore,
+    hasMore,
+    fetchOrders,
+    loadMoreOrders,
+    changeOrderStatus,
+  } = useOrders();
 
-  // Filter orders by search text AND status category selection
-  const filteredOrders = orders.filter((item) => {
-    const matchesSearch = item.customerName
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-    // item.orderNumber.includes(searchQuery);
+  // Refetch when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      fetchOrders(searchQuery, selectedStatus as OrderStatus | "All");
+    }, [fetchOrders, searchQuery, selectedStatus]),
+  );
 
-    const matchesStatus =
-      selectedStatus === "All" || item.status === selectedStatus;
+  // Trigger search/filter changes
+  useEffect(() => {
+    fetchOrders(searchQuery, selectedStatus as OrderStatus | "All");
+  }, [searchQuery, selectedStatus, fetchOrders]);
 
-    return matchesSearch && matchesStatus;
-  });
+  const handleRefresh = () => {
+    fetchOrders(searchQuery, selectedStatus as OrderStatus | "All");
+  };
+
+  const handleEndReached = () => {
+    if (hasMore && !loadingMore && !loading) {
+      loadMoreOrders(searchQuery, selectedStatus as OrderStatus | "All");
+    }
+  };
+
+  // Transform DB Order model to match OrderCard props expectations
+  const formatOrderForCard = (dbOrder: DBOrder) => {
+    return {
+      id: String(dbOrder.id),
+      orderNumber: String(dbOrder.id),
+      customerName: dbOrder.customer_name || "Unknown Customer",
+      clothingType: dbOrder.cloth_type,
+      deliveryDate: dbOrder.delivery_date,
+      status: dbOrder.status,
+    };
+  };
 
   return (
     <View
@@ -85,32 +80,59 @@ export default function OrdersScreen() {
         <SearchInput
           value={searchQuery}
           onChangeText={setSearchQuery}
-          placeholder="Search Order by Customer or ID"
+          placeholder="Search Order by Customer Name"
         />
 
         {/* Status Filter Horizontal Pills */}
         <StatusFilter
           selectedStatus={selectedStatus}
-          onSelectStatus={setSelectedStatus}
+          onSelectStatus={(status) => setSelectedStatus(status)}
         />
 
         {/* Orders FlatList */}
         <FlatList
-          data={filteredOrders}
-          keyExtractor={(item) => item.id}
+          data={orders}
+          keyExtractor={(item) => String(item.id)}
           renderItem={({ item }) => (
             <OrderCard
-              order={item}
+              order={formatOrderForCard(item)}
               onPress={(selected) =>
-                console.log("Selected Order:", selected.orderNumber)
+                router.push({
+                  pathname: "/(tabs)/orders/orderDetail",
+                  params: { id: selected.id },
+                })
               }
             />
           )}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={loading}
+              onRefresh={handleRefresh}
+              colors={[theme.colors.primary]}
+            />
+          }
+          onEndReached={handleEndReached}
+          onEndReachedThreshold={0.3}
+          ListFooterComponent={
+            loadingMore ? (
+              <ActivityIndicator
+                size="small"
+                color={theme.colors.primary}
+                style={styles.loader}
+              />
+            ) : null
+          }
           ListEmptyComponent={
-            <Typography variant="h4" style={styles.emptyText}>
-              No orders found.
-            </Typography>
+            !loading ? (
+              <Typography
+                variant="h4"
+                style={styles.emptyText}
+                color={theme.colors.textPrimary}
+              >
+                No orders found.
+              </Typography>
+            ) : null
           }
         />
       </View>
@@ -134,5 +156,8 @@ const styles = StyleSheet.create({
   emptyText: {
     textAlign: "center",
     marginTop: Metrics.margin.xxxl,
+  },
+  loader: {
+    marginVertical: Metrics.margin.md,
   },
 });

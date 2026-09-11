@@ -59,7 +59,12 @@ export default function CustomersScreen() {
                 name: item.name,
                 phone: item.phone,
               }}
-              onPress={(selected) => console.log("Selected:", selected.name)}
+              onPress={(selected) =>
+                router.push({
+                  pathname: "/(tabs)/customers/customerDetail",
+                  params: { id: selected.id },
+                })
+              }
             />
           )}
           showsVerticalScrollIndicator={false}

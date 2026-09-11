@@ -4,49 +4,149 @@ import { CustomTextArea } from "@/components/input/CustomTextArea";
 import { MeasurementInput } from "@/components/input/MeasurementInput";
 import { FeedHeader } from "@/components/ui/FeedHeader";
 import { Metrics } from "@/constants/metrics";
+import { useCustomers } from "@/hooks/useCustomer";
 import { useAppTheme } from "@/theme";
-import { useState } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import {
-    KeyboardAvoidingView,
-    Platform,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    View,
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  View,
 } from "react-native";
 
 export default function MeasurementsScreen() {
   const { theme } = useAppTheme();
+  const router = useRouter();
+  const { customerId } = useLocalSearchParams<{ customerId: string }>();
 
-  // Full Tailoring Measurements State
+  const { getCustomerWithMeasurements, saveCustomerMeasurements } =
+    useCustomers();
+
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [customerName, setCustomerName] = useState("");
+
   const [measurements, setMeasurements] = useState({
-    kameezLength: "40",
-    chest: "20",
-    waist: "18",
-    shoulder: "17",
-    sleeveLength: "24",
-    trouserLength: "40",
-    collar: "15.5",
-    bicep: "14",
-    armhole: "18",
-    cuff: "9.5",
-    hip: "22",
-    pancha: "16",
+    kameez_length: "",
+    chest: "",
+    waist: "",
+    shoulder: "",
+    sleeve_length: "",
+    trouser_length: "",
+    collar: "",
+    bicep: "",
+    armhole: "",
+    cuff: "",
+    hip: "",
+    pancha: "",
   });
 
   const [specialInstructions, setSpecialInstructions] = useState("");
+
+  useEffect(() => {
+    async function loadData() {
+      if (!customerId) {
+        setLoading(false);
+        return;
+      }
+
+      const numericId = Number(customerId);
+      const data = await getCustomerWithMeasurements(numericId);
+
+      if (data) {
+        setCustomerName(data.customer.name);
+        if (data.measurements) {
+          const m = data.measurements;
+          setMeasurements({
+            kameez_length: m.kameez_length ? String(m.kameez_length) : "",
+            chest: m.chest ? String(m.chest) : "",
+            waist: m.waist ? String(m.waist) : "",
+            shoulder: m.shoulder ? String(m.shoulder) : "",
+            sleeve_length: m.sleeve_length ? String(m.sleeve_length) : "",
+            trouser_length: m.trouser_length ? String(m.trouser_length) : "",
+            collar: m.collar ? String(m.collar) : "",
+            bicep: m.bicep ? String(m.bicep) : "",
+            armhole: m.armhole ? String(m.armhole) : "",
+            cuff: m.cuff ? String(m.cuff) : "",
+            hip: m.hip ? String(m.hip) : "",
+            pancha: m.pancha ? String(m.pancha) : "",
+          });
+          setSpecialInstructions(m.notes ?? "");
+        }
+      }
+      setLoading(false);
+    }
+
+    loadData();
+  }, [customerId, getCustomerWithMeasurements]);
 
   const updateMeasurement = (key: keyof typeof measurements, value: string) => {
     setMeasurements((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleSaveMeasurements = () => {
-    const data = {
-      measurements,
-      specialInstructions,
+  const handleSaveMeasurements = async () => {
+    if (!customerId) {
+      Alert.alert("Error", "No customer ID provided.");
+      return;
+    }
+
+    setSaving(true);
+    const numericId = Number(customerId);
+
+    const payload = {
+      kameez_length: measurements.kameez_length
+        ? Number(measurements.kameez_length)
+        : undefined,
+      chest: measurements.chest ? Number(measurements.chest) : undefined,
+      waist: measurements.waist ? Number(measurements.waist) : undefined,
+      shoulder: measurements.shoulder
+        ? Number(measurements.shoulder)
+        : undefined,
+      sleeve_length: measurements.sleeve_length
+        ? Number(measurements.sleeve_length)
+        : undefined,
+      trouser_length: measurements.trouser_length
+        ? Number(measurements.trouser_length)
+        : undefined,
+      collar: measurements.collar ? Number(measurements.collar) : undefined,
+      bicep: measurements.bicep ? Number(measurements.bicep) : undefined,
+      armhole: measurements.armhole ? Number(measurements.armhole) : undefined,
+      cuff: measurements.cuff ? Number(measurements.cuff) : undefined,
+      hip: measurements.hip ? Number(measurements.hip) : undefined,
+      pancha: measurements.pancha ? Number(measurements.pancha) : undefined,
+      notes: specialInstructions,
     };
-    console.log("Updated Measurements Saved:", data);
+
+    const success = await saveCustomerMeasurements(numericId, payload);
+    setSaving(false);
+
+    if (success) {
+      Alert.alert("Success", "Measurements updated successfully.", [
+        { text: "OK", onPress: () => router.back() },
+      ]);
+    } else {
+      Alert.alert("Error", "Failed to save measurements. Please try again.");
+    }
   };
+
+  if (loading) {
+    return (
+      <SafeAreaView
+        style={[
+          styles.container,
+          styles.centered,
+          { backgroundColor: theme.colors.background },
+        ]}
+      >
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView
@@ -65,14 +165,14 @@ export default function MeasurementsScreen() {
           keyboardShouldPersistTaps="handled"
         >
           {/* Customer Top Banner */}
-          <CustomerBanner name="Ahmed Khan" />
+          <CustomerBanner name={customerName || "Customer"} />
 
           {/* 2-Column Grid Layout for Measurements */}
           <View style={styles.gridContainer}>
             <MeasurementInput
               label="Shirt / Kameez Length"
-              value={measurements.kameezLength}
-              onChangeText={(text) => updateMeasurement("kameezLength", text)}
+              value={measurements.kameez_length}
+              onChangeText={(text) => updateMeasurement("kameez_length", text)}
             />
             <MeasurementInput
               label="Chest"
@@ -91,13 +191,13 @@ export default function MeasurementsScreen() {
             />
             <MeasurementInput
               label="Sleeve Length"
-              value={measurements.sleeveLength}
-              onChangeText={(text) => updateMeasurement("sleeveLength", text)}
+              value={measurements.sleeve_length}
+              onChangeText={(text) => updateMeasurement("sleeve_length", text)}
             />
             <MeasurementInput
               label="Trouser Length"
-              value={measurements.trouserLength}
-              onChangeText={(text) => updateMeasurement("trouserLength", text)}
+              value={measurements.trouser_length}
+              onChangeText={(text) => updateMeasurement("trouser_length", text)}
             />
             <MeasurementInput
               label="Collar Size"
@@ -133,7 +233,7 @@ export default function MeasurementsScreen() {
 
           {/* Special Instructions Input */}
           <CustomTextArea
-            label="Special Instructions / Collar"
+            label="Special Instructions / Notes"
             value={specialInstructions}
             onChangeText={setSpecialInstructions}
             placeholder="Notes regarding collar style, cuff type, etc."
@@ -141,9 +241,10 @@ export default function MeasurementsScreen() {
 
           {/* Reusable Action Button */}
           <CustomButton
-            title="Edit Measurements"
+            title={saving ? "Saving..." : "Save Measurements"}
             iconName="edit"
             onPress={handleSaveMeasurements}
+            disabled={saving}
             buttonStyle={styles.saveButton}
           />
         </ScrollView>
@@ -156,15 +257,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  centered: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
   keyboardView: {
     flex: 1,
   },
   scrollContent: {
     padding: Metrics.padding.xl,
     paddingBottom: Metrics.padding.xxxl,
-  },
-  headerEditIcon: {
-    paddingRight: Metrics.padding.md,
   },
   gridContainer: {
     flexDirection: "row",

@@ -5,7 +5,12 @@ import { Feather } from "@expo/vector-icons";
 import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 
-export type OrderStage = "Pending" | "Cut" | "Stitch" | "Ready" | "Delivered";
+export type OrderStage =
+  | "Pending"
+  | "Cutting"
+  | "Stitching"
+  | "Ready"
+  | "Delivered";
 
 interface OrderPipelineProps {
   stages: OrderStage[];

@@ -1,38 +1,43 @@
 import { CustomButton } from "@/components/button/CustomButton";
 import { CustomerSearchModal } from "@/components/customer/CustomerSearchModal";
 import { CustomDropdown } from "@/components/input/CustomDropdown";
+import { CustomTextArea } from "@/components/input/CustomTextArea";
 import { CustomTextInput } from "@/components/input/CustomTextInput";
 import { DatePickerInput } from "@/components/input/DatepickerInput";
 import Typography from "@/components/text/typography";
 import { FeedHeader } from "@/components/ui/FeedHeader";
 import { Metrics } from "@/constants/metrics";
+import { useCustomers } from "@/hooks/useCustomer";
+import { useOrders } from "@/hooks/useOrder";
 import { useAppTheme } from "@/theme";
-import { useState } from "react";
+import { Customer } from "@/types/customer";
+import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import {
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    TouchableOpacity,
-    View,
+  Alert,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from "react-native";
-
-const CUSTOMERS_LIST = [
-  { id: "1", name: "Ahmed Khan" },
-  { id: "2", name: "Muhammad Ali" },
-  { id: "3", name: "Usman Raza" },
-  { id: "4", name: "Hamza Malik" },
-  { id: "5", name: "Bilal Ahmad" },
-];
 
 export default function CreateOrderScreen() {
   const { theme } = useAppTheme();
+  const router = useRouter();
 
-  const [selectedCustomer, setSelectedCustomer] = useState<string>("");
+  const { addOrder, loading: isSaving, errors, clearFieldError } = useOrders();
+  const { customers, fetchCustomers } = useCustomers();
+
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
+    null,
+  );
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [clothingType, setClothingType] = useState("Shalwar Kameez");
   const [deliveryDate, setDeliveryDate] = useState<Date>(new Date());
   const [totalPrice, setTotalPrice] = useState("");
   const [advancePayment, setAdvancePayment] = useState("");
+  const [specialRequest, setSpecialRequest] = useState("");
 
   const total = parseFloat(totalPrice) || 0;
   const advance = parseFloat(advancePayment) || 0;
@@ -40,16 +45,42 @@ export default function CreateOrderScreen() {
 
   const clothingOptions = ["Shalwar Kameez", "Suit", "Pant Shirt", "Waistcoat"];
 
-  const handleCreateOrder = () => {
-    const orderData = {
-      customer: selectedCustomer,
-      clothingType,
-      deliveryDate,
-      totalPrice: total,
-      advancePayment: advance,
-      remainingPayment: remaining,
-    };
-    console.log("Order Created Successfully:", orderData);
+  useEffect(() => {
+    fetchCustomers("");
+  }, [fetchCustomers]);
+
+  const handleSelectCustomer = (customer: Customer) => {
+    setSelectedCustomer(customer);
+    clearFieldError("customer_id");
+    setIsSearchModalOpen(false);
+  };
+
+  const handleCreateOrder = async () => {
+    if (!selectedCustomer?.id) {
+      Alert.alert("Validation Error", "Please select a customer.");
+      return;
+    }
+
+    const formattedDate = deliveryDate.toISOString().split("T")[0];
+
+    const success = await addOrder({
+      customer_id: selectedCustomer.id,
+      cloth_type: clothingType,
+      delivery_date: formattedDate,
+      total_price: total,
+      advance_payment: advance,
+      special_request: specialRequest,
+      status: "Pending",
+    });
+
+    if (success) {
+      Alert.alert("Success", "Order created successfully!", [
+        {
+          text: "OK",
+          onPress: () => router.back(),
+        },
+      ]);
+    }
   };
 
   return (
@@ -62,7 +93,7 @@ export default function CreateOrderScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Customer Select Field (Tapping opens Modal) */}
+        {/* Customer Select Field */}
         <TouchableOpacity
           onPress={() => setIsSearchModalOpen(true)}
           activeOpacity={0.8}
@@ -70,9 +101,10 @@ export default function CreateOrderScreen() {
           <View pointerEvents="none">
             <CustomTextInput
               label="Select Customer *"
-              value={selectedCustomer}
+              value={selectedCustomer ? `${selectedCustomer.name}` : ""}
               onChangeText={() => {}}
               placeholder="Tap to search customer..."
+              error={errors.customer_id}
             />
           </View>
         </TouchableOpacity>
@@ -82,7 +114,10 @@ export default function CreateOrderScreen() {
           label="Clothing Type"
           value={clothingType}
           options={clothingOptions}
-          onSelect={setClothingType}
+          onSelect={(val) => {
+            setClothingType(val);
+            clearFieldError("cloth_type");
+          }}
           required
         />
 
@@ -90,7 +125,10 @@ export default function CreateOrderScreen() {
         <DatePickerInput
           label="Delivery Date"
           value={deliveryDate}
-          onChange={setDeliveryDate}
+          onChange={(date) => {
+            setDeliveryDate(date);
+            clearFieldError("delivery_date");
+          }}
           required
         />
 
@@ -98,17 +136,33 @@ export default function CreateOrderScreen() {
         <CustomTextInput
           label="Total Price (Rs)"
           value={totalPrice}
-          onChangeText={setTotalPrice}
+          onChangeText={(text) => {
+            setTotalPrice(text);
+            clearFieldError("total_price");
+          }}
           placeholder="0"
           keyboardType="numeric"
+          error={errors.total_price}
         />
 
         <CustomTextInput
           label="Advance Payment (Rs)"
           value={advancePayment}
-          onChangeText={setAdvancePayment}
+          onChangeText={(text) => {
+            setAdvancePayment(text);
+            clearFieldError("advance_payment");
+          }}
           placeholder="0"
           keyboardType="numeric"
+          error={errors.advance_payment}
+        />
+
+        {/* Special Request / Notes */}
+        <CustomTextArea
+          label="Special Requests / Instructions"
+          value={specialRequest}
+          onChangeText={setSpecialRequest}
+          placeholder="e.g. Double stitch, specific pocket style..."
         />
 
         {/* Remaining Payment Summary Bar */}
@@ -128,16 +182,17 @@ export default function CreateOrderScreen() {
           title="Create Order"
           iconName="check"
           onPress={handleCreateOrder}
+          loading={isSaving}
           buttonStyle={styles.createButton}
         />
       </ScrollView>
 
-      {/* Reusable Customer Search Modal Component */}
+      {/* Customer Search Modal */}
       <CustomerSearchModal
         visible={isSearchModalOpen}
-        customers={CUSTOMERS_LIST}
+        customers={customers}
         onClose={() => setIsSearchModalOpen(false)}
-        onSelectCustomer={(customer) => setSelectedCustomer(`${customer.name}`)}
+        onSelectCustomer={handleSelectCustomer}
       />
     </SafeAreaView>
   );

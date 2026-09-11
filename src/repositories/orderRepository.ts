@@ -125,6 +125,9 @@ export const orderRepository = {
     db: SQLiteDatabase,
     orderId: number,
   ): Promise<Order | null> {
+    const id = Number(orderId);
+    if (!id || Number.isNaN(id)) return null;
+
     return await db.getFirstAsync<Order>(
       `SELECT 
         o.id,
@@ -143,7 +146,38 @@ export const orderRepository = {
        JOIN customers c ON o.customer_id = c.id
        JOIN order_status os ON o.id = os.order_id
        WHERE o.id = ?`,
-      [orderId],
+      [id],
+    );
+  },
+
+  // Fetch all orders for a specific customer with joined status info
+  async getOrdersByCustomerId(
+    db: SQLiteDatabase,
+    customerId: number,
+  ): Promise<Order[]> {
+    const cid = Number(customerId);
+    if (!cid || Number.isNaN(cid)) return [];
+
+    return await db.getAllAsync<Order>(
+      `SELECT 
+        o.id,
+        o.customer_id,
+        c.name AS customer_name,
+        c.phone AS customer_phone,
+        o.cloth_type,
+        o.delivery_date,
+        o.total_price,
+        o.advance_payment,
+        o.special_request,
+        o.created_at,
+        os.status,
+        os.updated_at AS status_updated_at
+       FROM orders o
+       JOIN customers c ON o.customer_id = c.id
+       JOIN order_status os ON o.id = os.order_id
+       WHERE o.customer_id = ?
+       ORDER BY o.id DESC`,
+      [cid],
     );
   },
 };

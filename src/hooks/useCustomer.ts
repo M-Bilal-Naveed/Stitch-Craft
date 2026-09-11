@@ -1,5 +1,5 @@
 import { customerRepository } from "@/repositories/customerRepository";
-import { Customer, CustomerInput } from "@/types/customer";
+import { Customer, CustomerInput, Measurements } from "@/types/customer";
 import { useSQLiteContext } from "expo-sqlite";
 import { useCallback, useRef, useState } from "react";
 
@@ -88,6 +88,54 @@ export function useCustomers() {
     [db, page, hasMore],
   );
 
+  // Get single customer details by ID
+  const getCustomerById = useCallback(
+    async (id: number): Promise<Customer | null> => {
+      try {
+        return await customerRepository.getCustomerById(db, id);
+      } catch (error) {
+        console.error("Failed to fetch customer by ID:", error);
+        return null;
+      }
+    },
+    [db],
+  );
+
+  // Get customer profile together with measurements
+  const getCustomerWithMeasurements = useCallback(
+    async (
+      id: number,
+    ): Promise<{
+      customer: Customer;
+      measurements: Measurements | null;
+    } | null> => {
+      try {
+        return await customerRepository.getCustomerWithMeasurements(db, id);
+      } catch (error) {
+        console.error("Failed to fetch customer with measurements:", error);
+        return null;
+      }
+    },
+    [db],
+  );
+
+  // Update or save measurements directly for a customer
+  const saveCustomerMeasurements = useCallback(
+    async (
+      customerId: number,
+      measurements: Partial<Measurements>,
+    ): Promise<boolean> => {
+      try {
+        await customerRepository.saveMeasurements(db, customerId, measurements);
+        return true;
+      } catch (error) {
+        console.error("Failed to save customer measurements:", error);
+        return false;
+      }
+    },
+    [db],
+  );
+
   // Create a new customer profile
   const addCustomer = useCallback(
     async (input: CustomerInput): Promise<boolean> => {
@@ -128,6 +176,9 @@ export function useCustomers() {
     errors,
     fetchCustomers,
     loadMoreCustomers,
+    getCustomerById,
+    getCustomerWithMeasurements,
+    saveCustomerMeasurements,
     addCustomer,
     clearFieldError,
   };
