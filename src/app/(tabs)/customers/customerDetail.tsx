@@ -144,7 +144,7 @@ export default function CustomerDetailScreen() {
             <CustomerOrderHistoryItem
               key={order.id}
               order={order}
-              onPress={handleOrderPress}
+              // onPress={handleOrderPress}
             />
           ))
         ) : (
