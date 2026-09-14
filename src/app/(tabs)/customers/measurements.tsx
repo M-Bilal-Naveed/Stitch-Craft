@@ -6,6 +6,11 @@ import { FeedHeader } from "@/components/ui/FeedHeader";
 import { Metrics } from "@/constants/metrics";
 import { useCustomers } from "@/hooks/useCustomer";
 import { useAppTheme } from "@/theme";
+import {
+  MeasurementFields,
+  MeasurementKey,
+  MeasurementPayload,
+} from "@/types/measurement";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -19,6 +24,21 @@ import {
   View,
 } from "react-native";
 
+const INITIAL_MEASUREMENTS: MeasurementFields = {
+  kameez_length: "",
+  chest: "",
+  waist: "",
+  shoulder: "",
+  sleeve_length: "",
+  trouser_length: "",
+  collar: "",
+  bicep: "",
+  armhole: "",
+  cuff: "",
+  hip: "",
+  pancha: "",
+};
+
 export default function MeasurementsScreen() {
   const { theme } = useAppTheme();
   const router = useRouter();
@@ -31,21 +51,8 @@ export default function MeasurementsScreen() {
   const [saving, setSaving] = useState(false);
   const [customerName, setCustomerName] = useState("");
 
-  const [measurements, setMeasurements] = useState({
-    kameez_length: "",
-    chest: "",
-    waist: "",
-    shoulder: "",
-    sleeve_length: "",
-    trouser_length: "",
-    collar: "",
-    bicep: "",
-    armhole: "",
-    cuff: "",
-    hip: "",
-    pancha: "",
-  });
-
+  const [measurements, setMeasurements] =
+    useState<MeasurementFields>(INITIAL_MEASUREMENTS);
   const [specialInstructions, setSpecialInstructions] = useState("");
 
   useEffect(() => {
@@ -85,7 +92,7 @@ export default function MeasurementsScreen() {
     loadData();
   }, [customerId, getCustomerWithMeasurements]);
 
-  const updateMeasurement = (key: keyof typeof measurements, value: string) => {
+  const updateMeasurement = (key: MeasurementKey, value: string) => {
     setMeasurements((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -98,7 +105,7 @@ export default function MeasurementsScreen() {
     setSaving(true);
     const numericId = Number(customerId);
 
-    const payload = {
+    const payload: MeasurementPayload = {
       kameez_length: measurements.kameez_length
         ? Number(measurements.kameez_length)
         : undefined,
@@ -239,7 +246,7 @@ export default function MeasurementsScreen() {
             placeholder="Notes regarding collar style, cuff type, etc."
           />
 
-          {/* Reusable Action Button */}
+          {/* Action Button */}
           <CustomButton
             title={saving ? "Saving..." : "Save Measurements"}
             iconName="edit"

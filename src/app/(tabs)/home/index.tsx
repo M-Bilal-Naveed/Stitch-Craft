@@ -4,6 +4,7 @@ import MetricCard from "@/components/home/MetricCard";
 import WelcomeCard from "@/components/home/WelcomeCard";
 import Typography from "@/components/text/typography";
 import { Metrics } from "@/constants/metrics";
+import { useDashboard } from "@/hooks/useDashboard";
 import { useAppTheme } from "@/theme";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -12,6 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function DashboardScreen() {
   const { theme } = useAppTheme();
+  const { stats, loading } = useDashboard();
 
   return (
     <SafeAreaView
@@ -25,13 +27,13 @@ export default function DashboardScreen() {
       <View style={styles.grid}>
         <MetricCard
           title="Total Customers"
-          quantity={8}
+          quantity={loading ? "..." : stats.totalCustomers}
           icon={<Feather name="users" size={18} color={theme.colors.cGreen} />}
         />
 
         <MetricCard
           title="Active Orders"
-          quantity={18}
+          quantity={loading ? "..." : stats.activeOrders}
           icon={
             <Feather name="calendar" size={18} color={theme.colors.cGreen} />
           }
@@ -39,13 +41,13 @@ export default function DashboardScreen() {
 
         <MetricCard
           title="Pending"
-          quantity={12}
+          quantity={loading ? "..." : stats.pendingOrders}
           icon={<Feather name="clock" size={18} color={theme.colors.cGreen} />}
         />
 
         <MetricCard
           title="Ready to delivery"
-          quantity={3}
+          quantity={loading ? "..." : stats.readyOrders}
           icon={
             <MaterialCommunityIcons
               name="truck-delivery-outline"
