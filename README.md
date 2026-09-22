@@ -278,14 +278,6 @@ Advanced sales reports
 
 Inventory management
 
-📄 License
-
-Add your preferred license here.
-
-For example:
-
-MIT License
-
 🧵 Stitch Craft
 
 A simple offline tailoring management solution for small businesses.
