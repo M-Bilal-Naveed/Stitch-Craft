@@ -3,7 +3,8 @@ export interface User {
   name: string;
   shop_name: string;
   email: string;
-  password: string;
+  password?: string;
+  password_hash?: string;
   created_at: string;
 }
 

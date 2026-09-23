@@ -42,7 +42,7 @@ export function useLogin() {
         return false;
       }
 
-      if (user.password !== form.password) {
+      if (user.password_hash !== form.password) {
         setErrors({ password: "Incorrect password." });
         setLoading(false);
         return false;
