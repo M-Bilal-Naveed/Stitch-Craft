@@ -2,7 +2,7 @@ import { Metrics } from "@/constants/metrics";
 import { useAppTheme } from "@/theme";
 import { Feather } from "@expo/vector-icons";
 import DateTimePicker, {
-    DateTimePickerEvent,
+  DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
 import React, { useState } from "react";
 import { Platform, StyleSheet, TouchableOpacity, View } from "react-native";
@@ -89,6 +89,7 @@ export const DatePickerInput: React.FC<DatePickerInputProps> = ({
         <DateTimePicker
           value={value}
           mode="date"
+          minimumDate={new Date()}
           display={Platform.OS === "ios" ? "spinner" : "default"}
           onChange={handleDateChange}
         />
