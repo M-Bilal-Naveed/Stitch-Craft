@@ -1,11 +1,11 @@
 import { useAppTheme } from "@/theme";
 import { getToken } from "@/utils/authStorage";
-import { router } from "expo-router";
+import { Redirect } from "expo-router";
 import { useEffect, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { ActivityIndicator } from "react-native-paper";
 
-const AppEntry = () => {
+export default function Index() {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -18,7 +18,6 @@ const AppEntry = () => {
   const checkAuthStatus = async () => {
     try {
       const token = await getToken();
-
       setIsAuthenticated(!!token);
     } catch (error) {
       console.error("Error checking auth status:", error);
@@ -27,16 +26,6 @@ const AppEntry = () => {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (isLoading) return;
-
-    if (isAuthenticated) {
-      router.replace("/(tabs)/home");
-    } else {
-      router.replace("/login");
-    }
-  }, [isLoading, isAuthenticated]);
 
   if (isLoading) {
     return (
@@ -51,14 +40,13 @@ const AppEntry = () => {
     );
   }
 
-  return (
-    <View>
-      <Text>App Entry</Text>
-    </View>
-  );
-};
+  // Use declarative <Redirect /> with precise group paths
+  if (isAuthenticated) {
+    return <Redirect href="/(tabs)/home" />;
+  }
 
-export default AppEntry;
+  return <Redirect href="/(auth)/login" />;
+}
 
 const styles = StyleSheet.create({
   loadingContainer: {

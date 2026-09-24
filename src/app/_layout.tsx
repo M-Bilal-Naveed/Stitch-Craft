@@ -28,6 +28,7 @@ function AppContent() {
       />
       <SQLiteProvider databaseName="stitchcraft.db" onInit={initializeDatabase}>
         <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="index" options={{}} />
           <Stack.Screen name="(auth)" options={{}} />
           <Stack.Screen name="(tabs)" options={{}} />
         </Stack>
