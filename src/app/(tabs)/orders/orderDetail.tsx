@@ -1,5 +1,6 @@
 import { OrderDetailCard } from "@/components/orders/OrderDetailCard";
 import { OrderPipeline, OrderStage } from "@/components/orders/OrderPipline";
+import { PaymentSummaryCard } from "@/components/orders/PaymentSummaryCard";
 import Typography from "@/components/text/typography";
 import { FeedHeader } from "@/components/ui/FeedHeader";
 import { Metrics } from "@/constants/metrics";
@@ -63,20 +64,44 @@ export default function OrderDetailScreen() {
     loadOrderDetail();
   }, [loadOrderDetail]);
 
-  // Handle stage selection & SQLite update
-  const handleStageUpdate = async (index: number, stage: OrderStage) => {
+  const handleStageUpdate = (targetIndex: number, targetStage: OrderStage) => {
     if (!order) return;
 
-    const dbStatus = stage as OrderStatus;
-
-    try {
-      await orderRepository.updateOrderStatus(db, order.id, dbStatus);
-      setCurrentStageIndex(index);
-      setOrder((prev) => (prev ? { ...prev, status: dbStatus } : prev));
-    } catch (error) {
-      console.error("Failed to update status:", error);
-      Alert.alert("Error", "Failed to update order status.");
+    // Rule 1: Disallow moving backward to a previous stage
+    if (targetIndex < currentStageIndex) {
+      return;
     }
+
+    // If clicking the currently active stage, do nothing
+    if (targetIndex === currentStageIndex) return;
+
+    // Rule 2: Confirmation Alert before applying the change
+    Alert.alert(
+      "Update Status",
+      `Are you sure you want to update the order status to "${targetStage}"?`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Yes",
+          style: "default",
+          onPress: async () => {
+            const dbStatus = targetStage as OrderStatus;
+            try {
+              await orderRepository.updateOrderStatus(db, order.id, dbStatus);
+              setCurrentStageIndex(targetIndex);
+              setOrder((prev) => (prev ? { ...prev, status: dbStatus } : prev));
+            } catch (error) {
+              console.error("Failed to update status:", error);
+              Alert.alert("Error", "Failed to update order status.");
+            }
+          },
+        },
+      ],
+      { cancelable: true },
+    );
   };
 
   if (loading) {
@@ -104,10 +129,6 @@ export default function OrderDetailScreen() {
       </SafeAreaView>
     );
   }
-
-  const totalPrice = order.total_price || 0;
-  const advancePaid = order.advance_payment || 0;
-  const remainingBalance = Math.max(0, totalPrice - advancePaid);
 
   return (
     <SafeAreaView
@@ -151,50 +172,12 @@ export default function OrderDetailScreen() {
           </View>
         ) : null}
 
-        {/* Payment Summary Section */}
-        <View style={styles.paymentSection}>
-          <Typography
-            variant="caption"
-            color={theme.colors.textMuted}
-            style={styles.paymentTitle}
-          >
-            PAYMENT SUMMARY
-          </Typography>
-
-          <View style={styles.paymentRow}>
-            <Typography variant="body1" color={theme.colors.textPrimary}>
-              Total Price:
-            </Typography>
-            <Typography variant="body1" color={theme.colors.textPrimary}>
-              Rs. {totalPrice.toLocaleString()}
-            </Typography>
-          </View>
-
-          <View style={styles.paymentRow}>
-            <Typography variant="body2" color={theme.colors.textMuted}>
-              Advance Paid:
-            </Typography>
-            <Typography variant="body2" color={theme.colors.textMuted}>
-              - Rs. {advancePaid.toLocaleString()}
-            </Typography>
-          </View>
-
-          <View
-            style={[
-              styles.divider,
-              { backgroundColor: theme.colors.halfWhite },
-            ]}
-          />
-
-          <View style={styles.paymentRow}>
-            <Typography variant="body1" color={theme.colors.accent.Cutting}>
-              Remaining Balance:
-            </Typography>
-            <Typography variant="body1" color={theme.colors.accent.Cutting}>
-              Rs. {remainingBalance.toLocaleString()}
-            </Typography>
-          </View>
-        </View>
+        {/* Component 3: Payment Summary Card */}
+        <PaymentSummaryCard
+          totalPrice={order.total_price || 0}
+          advancePaid={order.advance_payment || 0}
+          isDelivered={order.status === "Delivered"}
+        />
       </ScrollView>
     </SafeAreaView>
   );
@@ -215,22 +198,8 @@ const styles = StyleSheet.create({
   notesSection: {
     marginVertical: Metrics.margin.md,
   },
-  paymentSection: {
-    marginTop: Metrics.margin.md,
-  },
   paymentTitle: {
-    fontWeight: "700",
     letterSpacing: 0.8,
     marginBottom: Metrics.margin.md,
-  },
-  paymentRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: Metrics.margin.xs,
-  },
-  divider: {
-    height: 1,
-    marginVertical: Metrics.margin.sm,
   },
 });
