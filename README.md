@@ -1,4 +1,4 @@
-#🧵 Stitch Craft
+🧵 Stitch Craft
 
 Stitch Craft is a fully offline React Native + Expo mobile application built specifically for small tailor shops and tailoring businesses.
 
@@ -195,7 +195,10 @@ https://github.com/user-attachments/assets/e5edcbea-216a-4f01-9f07-e5783e6f1702
 The application is built using Expo Application Services (EAS).
 
 📱 EAS Build / App Link:
-https://expo.dev/accounts/m_bilal_naveed/projects/stitchcraft/builds/2dc19f6e-3703-4d8c-ac3f-fe33c2f8beda
+https://expo.dev/accounts/m_bilal_naveed/projects/stitchcraft/builds/21d9d1b9-fa9a-48d8-b5d9-d39a69229a25
+
+<img width="309" height="344" alt="QRcode" src="https://github.com/user-attachments/assets/d9a10c41-7dec-4598-aa67-949298aa5acd" />
+
 
 🚀 Getting Started
 Prerequisites
