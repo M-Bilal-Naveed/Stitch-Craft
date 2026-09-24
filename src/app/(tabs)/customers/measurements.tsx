@@ -39,13 +39,32 @@ const INITIAL_MEASUREMENTS: MeasurementFields = {
   pancha: "",
 };
 
+const MEASUREMENT_CONFIG: { key: MeasurementKey; label: string }[] = [
+  { key: "kameez_length", label: "Shirt / Kameez Length" },
+  { key: "chest", label: "Chest" },
+  { key: "waist", label: "Waist" },
+  { key: "shoulder", label: "Shoulder" },
+  { key: "sleeve_length", label: "Sleeve Length" },
+  { key: "trouser_length", label: "Trouser Length" },
+  { key: "collar", label: "Collar Size" },
+  { key: "bicep", label: "Bicep" },
+  { key: "armhole", label: "Armhole" },
+  { key: "cuff", label: "Cuff" },
+  { key: "hip", label: "Hip" },
+  { key: "pancha", label: "Bottom / Pancha" },
+];
+
 export default function MeasurementsScreen() {
   const { theme } = useAppTheme();
   const router = useRouter();
   const { customerId } = useLocalSearchParams<{ customerId: string }>();
 
-  const { getCustomerWithMeasurements, saveCustomerMeasurements } =
-    useCustomers();
+  const {
+    getCustomerWithMeasurements,
+    saveCustomerMeasurements,
+    measurementErrors,
+    clearMeasurementFieldError,
+  } = useCustomers();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -53,7 +72,11 @@ export default function MeasurementsScreen() {
 
   const [measurements, setMeasurements] =
     useState<MeasurementFields>(INITIAL_MEASUREMENTS);
+  const [initialMeasurements, setInitialMeasurements] =
+    useState<MeasurementFields>(INITIAL_MEASUREMENTS);
+
   const [specialInstructions, setSpecialInstructions] = useState("");
+  const [initialInstructions, setInitialInstructions] = useState("");
 
   useEffect(() => {
     async function loadData() {
@@ -69,7 +92,7 @@ export default function MeasurementsScreen() {
         setCustomerName(data.customer.name);
         if (data.measurements) {
           const m = data.measurements;
-          setMeasurements({
+          const loadedMeasurements: MeasurementFields = {
             kameez_length: m.kameez_length ? String(m.kameez_length) : "",
             chest: m.chest ? String(m.chest) : "",
             waist: m.waist ? String(m.waist) : "",
@@ -82,8 +105,14 @@ export default function MeasurementsScreen() {
             cuff: m.cuff ? String(m.cuff) : "",
             hip: m.hip ? String(m.hip) : "",
             pancha: m.pancha ? String(m.pancha) : "",
-          });
-          setSpecialInstructions(m.notes ?? "");
+          };
+
+          setMeasurements(loadedMeasurements);
+          setInitialMeasurements(loadedMeasurements);
+
+          const notes = m.notes ?? "";
+          setSpecialInstructions(notes);
+          setInitialInstructions(notes);
         }
       }
       setLoading(false);
@@ -94,13 +123,17 @@ export default function MeasurementsScreen() {
 
   const updateMeasurement = (key: MeasurementKey, value: string) => {
     setMeasurements((prev) => ({ ...prev, [key]: value }));
+    clearMeasurementFieldError(key);
   };
 
+  const isFormUnchanged =
+    JSON.stringify(measurements) === JSON.stringify(initialMeasurements) &&
+    specialInstructions === initialInstructions;
+
+  const isSaveDisabled = saving || isFormUnchanged;
+
   const handleSaveMeasurements = async () => {
-    if (!customerId) {
-      Alert.alert("Error", "No customer ID provided.");
-      return;
-    }
+    if (!customerId) return;
 
     setSaving(true);
     const numericId = Number(customerId);
@@ -129,16 +162,19 @@ export default function MeasurementsScreen() {
       notes: specialInstructions,
     };
 
-    const success = await saveCustomerMeasurements(numericId, payload);
+    const success = await saveCustomerMeasurements(
+      numericId,
+      payload,
+      measurements,
+    );
+
     setSaving(false);
 
-    if (success) {
-      Alert.alert("Success", "Measurements updated successfully.", [
-        { text: "OK", onPress: () => router.back() },
-      ]);
-    } else {
-      Alert.alert("Error", "Failed to save measurements. Please try again.");
-    }
+    if (!success) return;
+
+    Alert.alert("Success", "Measurements updated successfully.", [
+      { text: "OK", onPress: () => router.back() },
+    ]);
   };
 
   if (loading) {
@@ -162,7 +198,7 @@ export default function MeasurementsScreen() {
       <FeedHeader title="Measurements" />
 
       <KeyboardAvoidingView
-        style={styles.keyboardView}
+        style={styles.flexOne}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 10 : 0}
       >
@@ -171,74 +207,21 @@ export default function MeasurementsScreen() {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Customer Top Banner */}
           <CustomerBanner name={customerName || "Customer"} />
 
-          {/* 2-Column Grid Layout for Measurements */}
           <View style={styles.gridContainer}>
-            <MeasurementInput
-              label="Shirt / Kameez Length"
-              value={measurements.kameez_length}
-              onChangeText={(text) => updateMeasurement("kameez_length", text)}
-            />
-            <MeasurementInput
-              label="Chest"
-              value={measurements.chest}
-              onChangeText={(text) => updateMeasurement("chest", text)}
-            />
-            <MeasurementInput
-              label="Waist"
-              value={measurements.waist}
-              onChangeText={(text) => updateMeasurement("waist", text)}
-            />
-            <MeasurementInput
-              label="Shoulder"
-              value={measurements.shoulder}
-              onChangeText={(text) => updateMeasurement("shoulder", text)}
-            />
-            <MeasurementInput
-              label="Sleeve Length"
-              value={measurements.sleeve_length}
-              onChangeText={(text) => updateMeasurement("sleeve_length", text)}
-            />
-            <MeasurementInput
-              label="Trouser Length"
-              value={measurements.trouser_length}
-              onChangeText={(text) => updateMeasurement("trouser_length", text)}
-            />
-            <MeasurementInput
-              label="Collar Size"
-              value={measurements.collar}
-              onChangeText={(text) => updateMeasurement("collar", text)}
-            />
-            <MeasurementInput
-              label="Bicep"
-              value={measurements.bicep}
-              onChangeText={(text) => updateMeasurement("bicep", text)}
-            />
-            <MeasurementInput
-              label="Armhole"
-              value={measurements.armhole}
-              onChangeText={(text) => updateMeasurement("armhole", text)}
-            />
-            <MeasurementInput
-              label="Cuff"
-              value={measurements.cuff}
-              onChangeText={(text) => updateMeasurement("cuff", text)}
-            />
-            <MeasurementInput
-              label="Hip"
-              value={measurements.hip}
-              onChangeText={(text) => updateMeasurement("hip", text)}
-            />
-            <MeasurementInput
-              label="Bottom / Pancha"
-              value={measurements.pancha}
-              onChangeText={(text) => updateMeasurement("pancha", text)}
-            />
+            {MEASUREMENT_CONFIG.map(({ key, label }) => (
+              <MeasurementInput
+                key={key}
+                label={label}
+                value={measurements[key]}
+                onChangeText={(text) => updateMeasurement(key, text)}
+                hasError={!!measurementErrors[key]}
+                errorMessage={measurementErrors[key]}
+              />
+            ))}
           </View>
 
-          {/* Special Instructions Input */}
           <CustomTextArea
             label="Special Instructions / Notes"
             value={specialInstructions}
@@ -246,12 +229,11 @@ export default function MeasurementsScreen() {
             placeholder="Notes regarding collar style, cuff type, etc."
           />
 
-          {/* Action Button */}
           <CustomButton
             title={saving ? "Saving..." : "Save Measurements"}
             iconName="edit"
             onPress={handleSaveMeasurements}
-            disabled={saving}
+            disabled={isSaveDisabled}
             buttonStyle={styles.saveButton}
           />
         </ScrollView>
@@ -264,12 +246,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  flexOne: {
+    flex: 1,
+  },
   centered: {
     justifyContent: "center",
     alignItems: "center",
-  },
-  keyboardView: {
-    flex: 1,
   },
   scrollContent: {
     padding: Metrics.padding.xl,

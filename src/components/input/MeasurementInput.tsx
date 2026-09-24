@@ -11,6 +11,8 @@ interface MeasurementInputProps {
   onChangeText: (text: string) => void;
   placeholder?: string;
   unit?: string;
+  hasError?: boolean;
+  errorMessage?: string;
 }
 
 export const MeasurementInput: React.FC<MeasurementInputProps> = ({
@@ -19,71 +21,106 @@ export const MeasurementInput: React.FC<MeasurementInputProps> = ({
   onChangeText,
   placeholder = "0",
   unit = "in",
+  hasError = false,
+  errorMessage,
 }) => {
   const { theme } = useAppTheme();
 
-  return (
-    <View
-      style={[
-        styles.card,
-        {
-          backgroundColor: theme.colors.settingCard,
-          borderColor: theme.colors.settingBoarder,
-        },
-      ]}
-    >
-      <Typography
-        variant="caption"
-        color={theme.colors.textMuted}
-        style={styles.label}
-      >
-        {label}
-      </Typography>
+  const borderColor = hasError
+    ? theme.colors.error
+    : theme.colors.settingBoarder;
 
-      <View style={styles.inputRow}>
-        <TextInput
-          value={value}
-          onChangeText={onChangeText}
-          placeholder={placeholder}
-          placeholderTextColor={theme.colors.textMuted}
-          keyboardType="numeric"
-          style={[styles.input, { color: theme.colors.textPrimary }]}
-        />
+  return (
+    <View style={styles.container}>
+      {/* Input Box */}
+      <View
+        style={[
+          styles.card,
+          {
+            backgroundColor: theme.colors.settingCard,
+            borderColor,
+          },
+        ]}
+      >
         <Typography
-          variant="body2"
-          color={theme.colors.textPrimary}
-          style={styles.unitText}
+          variant="caption"
+          color={theme.colors.textMuted}
+          style={styles.label}
         >
-          {unit}
+          {label}
         </Typography>
+
+        <View style={styles.inputRow}>
+          <TextInput
+            value={value}
+            onChangeText={onChangeText}
+            placeholder={placeholder}
+            placeholderTextColor={theme.colors.textMuted}
+            keyboardType="numeric"
+            style={[styles.input, { color: theme.colors.textPrimary }]}
+          />
+
+          <Typography
+            variant="body2"
+            color={theme.colors.textPrimary}
+            style={styles.unitText}
+          >
+            {unit}
+          </Typography>
+        </View>
       </View>
+
+      {/* Error Outside Box */}
+      {hasError && errorMessage ? (
+        <Typography
+          variant="caption"
+          color={theme.colors.error}
+          style={styles.errorText}
+        >
+          {errorMessage}
+        </Typography>
+      ) : null}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  card: {
+  container: {
     width: "48%",
+    marginBottom: Metrics.margin.md,
+  },
+
+  card: {
+    width: "100%",
     padding: Metrics.padding.lg,
     borderRadius: Metrics.radius.lg,
     borderWidth: 1,
-    marginBottom: Metrics.margin.md,
   },
+
   label: {
     marginBottom: Metrics.margin.xs,
   },
+
   inputRow: {
     flexDirection: "row",
     alignItems: "center",
   },
+
   input: {
     fontSize: 14,
     fontFamily: Fonts.bold,
     padding: 0,
     minWidth: 40,
+    flex: 1,
   },
+
   unitText: {
     fontFamily: Fonts.bold,
     marginLeft: Metrics.margin.xs,
+  },
+
+  errorText: {
+    marginTop: Metrics.margin.xs,
+    paddingHorizontal: Metrics.padding.xs,
   },
 });

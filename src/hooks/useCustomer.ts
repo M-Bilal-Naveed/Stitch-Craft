@@ -1,14 +1,19 @@
 import { customerRepository } from "@/repositories/customerRepository";
 import { Customer, CustomerInput, Measurements } from "@/types/customer";
+import { MeasurementFields } from "@/types/measurement";
 import { useSQLiteContext } from "expo-sqlite";
 import { useCallback, useRef, useState } from "react";
 
 const PAGE_SIZE = 10;
 
-type CustomerErrors = {
+export type CustomerErrors = {
   name?: string;
   phone?: string;
   address?: string;
+};
+
+export type MeasurementErrors = {
+  [K in keyof MeasurementFields]?: string;
 };
 
 export function useCustomers() {
@@ -18,7 +23,12 @@ export function useCustomers() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
+
+  // Field error states managed inside the hook
   const [errors, setErrors] = useState<CustomerErrors>({});
+  const [measurementErrors, setMeasurementErrors] = useState<MeasurementErrors>(
+    {},
+  );
 
   const isFetchingRef = useRef(false);
 
@@ -119,21 +129,65 @@ export function useCustomers() {
     [db],
   );
 
-  // Update or save measurements directly for a customer
+  // Validate measurement fields on button press
+  const validateMeasurements = useCallback(
+    (measurements: MeasurementFields): boolean => {
+      const newErrors: MeasurementErrors = {};
+
+      (Object.keys(measurements) as (keyof MeasurementFields)[]).forEach(
+        (key) => {
+          const rawValue = measurements[key];
+          const trimmed = rawValue ? String(rawValue).trim() : "";
+
+          // Check empty input
+          if (!trimmed) {
+            newErrors[key] = "Measurement can't be empty";
+            return;
+          }
+
+          const num = Number(trimmed);
+          if (isNaN(num)) {
+            newErrors[key] = "Invalid number";
+          } else if (num < 0) {
+            newErrors[key] = "Measurement Can't be negative";
+          } else if (num === 0) {
+            newErrors[key] = "Measurement Can't be 0";
+          }
+        },
+      );
+
+      setMeasurementErrors(newErrors);
+      return Object.keys(newErrors).length === 0;
+    },
+    [],
+  );
+
+  // Save measurements with submit validation
   const saveCustomerMeasurements = useCallback(
     async (
       customerId: number,
-      measurements: Partial<Measurements>,
+      measurementsPayload: Partial<Measurements>,
+      measurementFields?: MeasurementFields,
     ): Promise<boolean> => {
+      if (measurementFields) {
+        const isValid = validateMeasurements(measurementFields);
+        if (!isValid) return false;
+      }
+
       try {
-        await customerRepository.saveMeasurements(db, customerId, measurements);
+        await customerRepository.saveMeasurements(
+          db,
+          customerId,
+          measurementsPayload,
+        );
+        setMeasurementErrors({});
         return true;
       } catch (error) {
         console.error("Failed to save customer measurements:", error);
         return false;
       }
     },
-    [db],
+    [db, validateMeasurements],
   );
 
   // Create a new customer profile
@@ -168,12 +222,24 @@ export function useCustomers() {
     setErrors((prev) => ({ ...prev, [field]: undefined }));
   }, []);
 
+  const clearMeasurementFieldError = useCallback(
+    (field: keyof MeasurementFields) => {
+      setMeasurementErrors((prev) => ({ ...prev, [field]: undefined }));
+    },
+    [],
+  );
+
+  const clearAllMeasurementErrors = useCallback(() => {
+    setMeasurementErrors({});
+  }, []);
+
   return {
     customers,
     loading,
     loadingMore,
     hasMore,
     errors,
+    measurementErrors,
     fetchCustomers,
     loadMoreCustomers,
     getCustomerById,
@@ -181,5 +247,8 @@ export function useCustomers() {
     saveCustomerMeasurements,
     addCustomer,
     clearFieldError,
+    clearMeasurementFieldError,
+    clearAllMeasurementErrors,
+    validateMeasurements,
   };
 }
