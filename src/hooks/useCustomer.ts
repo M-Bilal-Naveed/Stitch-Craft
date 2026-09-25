@@ -195,8 +195,24 @@ export function useCustomers() {
     async (input: CustomerInput): Promise<boolean> => {
       const newErrors: CustomerErrors = {};
 
-      if (!input?.name?.trim()) newErrors.name = "Customer name is required.";
-      if (!input?.phone?.trim()) newErrors.phone = "Phone number is required.";
+      const name = input?.name?.trim() ?? "";
+      const phone = input?.phone?.trim() ?? "";
+
+      if (!name) {
+        newErrors.name = "Customer name is required.";
+      }
+
+      if (!phone) {
+        newErrors.phone = "Phone number is required.";
+      } else {
+        // Validates formats: 03XXXXXXXXX (11 digits) or +923XXXXXXXXX / 923XXXXXXXXX
+        const cleanPhone = phone.replace(/[\s-]/g, "");
+        const pkPhoneRegex = /^(?:\+92|92|0)?3\d{9}$/;
+
+        if (!pkPhoneRegex.test(cleanPhone)) {
+          newErrors.phone = "Enter a valid phone number (e.g., 03001234567).";
+        }
+      }
 
       if (Object.keys(newErrors).length > 0) {
         setErrors(newErrors);
@@ -205,7 +221,11 @@ export function useCustomers() {
 
       setLoading(true);
       try {
-        await customerRepository.createCustomer(db, input);
+        await customerRepository.createCustomer(db, {
+          ...input,
+          name,
+          phone,
+        });
         setErrors({});
         return true;
       } catch (error) {
