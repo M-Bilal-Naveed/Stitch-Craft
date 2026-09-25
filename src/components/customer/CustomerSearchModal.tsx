@@ -7,11 +7,11 @@ import React, { useState } from "react";
 import {
   FlatList,
   Modal,
-  SafeAreaView,
   StyleSheet,
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface CustomerSearchModalProps {
   visible: boolean;
@@ -53,6 +53,25 @@ export const CustomerSearchModal: React.FC<CustomerSearchModalProps> = ({
         ]}
       >
         <View style={styles.modalBody}>
+          <View style={styles.modalHeader}>
+            <Typography variant="h3" color={theme.colors.textPrimary}>
+              Select Customer
+            </Typography>
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel="Close customer search"
+              onPress={onClose}
+              style={[
+                styles.closeButton,
+                { backgroundColor: theme.colors.secondary },
+              ]}
+            >
+              <Typography variant="body2" color={theme.colors.text}>
+                Close
+              </Typography>
+            </TouchableOpacity>
+          </View>
+
           <SearchInput
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -105,6 +124,20 @@ const styles = StyleSheet.create({
   modalBody: {
     flex: 1,
     padding: Metrics.padding.xl,
+  },
+  modalHeader: {
+    minHeight: Metrics.height.header,
+    marginBottom: Metrics.margin.md,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  closeButton: {
+    minHeight: Metrics.height.buttonSmall,
+    paddingHorizontal: Metrics.padding.lg,
+    borderRadius: Metrics.radius.button,
+    alignItems: "center",
+    justifyContent: "center",
   },
   customerItem: {
     paddingVertical: Metrics.padding.lg,
