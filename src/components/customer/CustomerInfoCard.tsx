@@ -2,6 +2,7 @@ import Typography from "@/components/text/typography";
 import { Metrics } from "@/constants/metrics";
 import { useAppTheme } from "@/theme";
 import { Feather } from "@expo/vector-icons";
+import EvilIcons from "@expo/vector-icons/EvilIcons";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 
@@ -66,9 +67,16 @@ export const CustomerInfoCard: React.FC<CustomerInfoCardProps> = ({
           </Typography>
         </View>
 
-        <Typography variant="caption" color={theme.colors.textMuted}>
-          Address: {address}
-        </Typography>
+        <View style={styles.phoneRow}>
+          <EvilIcons name="location" size={14} color={theme.colors.textMuted} />
+          <Typography
+            variant="caption"
+            color={theme.colors.textMuted}
+            numberOfLines={1}
+          >
+            {address}
+          </Typography>
+        </View>
       </View>
     </View>
   );
