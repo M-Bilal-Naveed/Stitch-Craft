@@ -80,6 +80,8 @@ You can easily:
 
 Add new customers
 
+Delete the added customer
+
 Search existing customers
 
 View customer details
