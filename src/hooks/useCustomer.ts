@@ -238,6 +238,21 @@ export function useCustomers() {
     [db],
   );
 
+  // Delete customer and update internal state
+  const deleteCustomer = useCallback(
+    async (customerId: number): Promise<boolean> => {
+      try {
+        await customerRepository.deleteCustomer(db, customerId);
+        setCustomers((prev) => prev.filter((item) => item.id !== customerId));
+        return true;
+      } catch (error) {
+        console.error("Failed to delete customer:", error);
+        return false;
+      }
+    },
+    [db],
+  );
+
   const clearFieldError = useCallback((field: keyof CustomerErrors) => {
     setErrors((prev) => ({ ...prev, [field]: undefined }));
   }, []);
@@ -266,6 +281,7 @@ export function useCustomers() {
     getCustomerWithMeasurements,
     saveCustomerMeasurements,
     addCustomer,
+    deleteCustomer,
     clearFieldError,
     clearMeasurementFieldError,
     clearAllMeasurementErrors,

@@ -11,6 +11,7 @@ import { customerRepository } from "@/repositories/customerRepository";
 import { orderRepository } from "@/repositories/orderRepository";
 import { useAppTheme } from "@/theme";
 import { Customer } from "@/types/customer";
+import Entypo from "@expo/vector-icons/Entypo";
 import { router, useLocalSearchParams } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { useCallback, useEffect, useState } from "react";
@@ -32,6 +33,7 @@ export default function CustomerDetailScreen() {
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [orders, setOrders] = useState<CustomerOrderItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [deleting, setDeleting] = useState<boolean>(false);
 
   // Load Customer info and related Orders from SQLite
   const loadCustomerData = useCallback(async () => {
@@ -82,6 +84,37 @@ export default function CustomerDetailScreen() {
       pathname: "/(tabs)/orders/orderDetail",
       params: { id: orderItem.id },
     });
+  };
+
+  const handleDeleteCustomer = () => {
+    if (!customer?.id) return;
+
+    Alert.alert(
+      "Delete Customer",
+      `Are you sure you want to delete ${customer.name}? This action cannot be undone.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            setDeleting(true);
+            try {
+              await customerRepository.deleteCustomer(db, customer.id!);
+              router.back();
+            } catch (error) {
+              console.error("Failed to delete customer:", error);
+              Alert.alert(
+                "Error",
+                "Could not delete customer. Please try again.",
+              );
+            } finally {
+              setDeleting(false);
+            }
+          },
+        },
+      ],
+    );
   };
 
   if (loading) {
@@ -172,6 +205,16 @@ export default function CustomerDetailScreen() {
           Measurements
         </Typography>
       </TouchableOpacity>
+
+      {/* Delete Customer Button */}
+      <TouchableOpacity
+        style={[styles.deleteButton, { backgroundColor: theme.colors.error }]}
+        onPress={handleDeleteCustomer}
+        disabled={deleting}
+        activeOpacity={0.8}
+      >
+        <Entypo name="trash" size={24} color={theme.colors.text} />
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -202,5 +245,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: Metrics.padding.md,
     borderTopLeftRadius: Metrics.radius.md,
     borderBottomLeftRadius: Metrics.radius.md,
+  },
+  deleteButton: {
+    width: Metrics.width.lg,
+    height: Metrics.height.xl,
+    position: "absolute",
+    bottom: "10%",
+    right: Metrics.margin.xxl,
+    borderRadius: Metrics.radius.circle,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

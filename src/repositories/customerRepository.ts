@@ -166,4 +166,17 @@ export const customerRepository = {
       [safeLimit, safeOffset],
     );
   },
+
+  // Delete customer profile and associated measurements
+  async deleteCustomer(db: SQLiteDatabase, customerId: number): Promise<void> {
+    const safeId = Number(customerId);
+    if (!safeId || Number.isNaN(safeId)) return;
+
+    await db.withExclusiveTransactionAsync(async (txn) => {
+      await txn.runAsync(`DELETE FROM measurements WHERE customer_id = ?`, [
+        safeId,
+      ]);
+      await txn.runAsync(`DELETE FROM customers WHERE id = ?`, [safeId]);
+    });
+  },
 };
