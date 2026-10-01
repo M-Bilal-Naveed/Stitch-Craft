@@ -162,6 +162,23 @@ export function useOrders() {
     [db],
   );
 
+  // Delete an order
+  const deleteOrder = useCallback(
+    async (orderId: number): Promise<boolean> => {
+      try {
+        const success = await orderRepository.deleteOrder(db, orderId);
+        if (success) {
+          setOrders((prev) => prev.filter((ord) => ord.id !== orderId));
+        }
+        return success;
+      } catch (error) {
+        console.error("Failed to delete order:", error);
+        return false;
+      }
+    },
+    [db],
+  );
+
   const clearFieldError = useCallback((field: keyof OrderErrors) => {
     setErrors((prev) => ({ ...prev, [field]: undefined }));
   }, []);
@@ -177,6 +194,7 @@ export function useOrders() {
     getOrderById,
     getOrdersByCustomerId,
     addOrder,
+    deleteOrder,
     changeOrderStatus,
     clearFieldError,
   };

@@ -8,7 +8,8 @@ import { orderRepository } from "@/repositories/orderRepository";
 import { useAppTheme } from "@/theme";
 import { Order } from "@/types/order";
 import { OrderStatus } from "@/types/orderStatus";
-import { useLocalSearchParams } from "expo-router";
+import { Entypo } from "@expo/vector-icons";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -17,6 +18,7 @@ import {
   SafeAreaView,
   ScrollView,
   StyleSheet,
+  TouchableOpacity,
   View,
 } from "react-native";
 
@@ -32,10 +34,12 @@ const PIPELINE_STAGES: OrderStage[] = [
 export default function OrderDetailScreen() {
   const { theme } = useAppTheme();
   const db = useSQLiteContext();
+  const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [currentStageIndex, setCurrentStageIndex] = useState<number>(0);
 
   // Load Order details from SQLite
@@ -75,7 +79,7 @@ export default function OrderDetailScreen() {
     // If clicking the currently active stage, do nothing
     if (targetIndex === currentStageIndex) return;
 
-    // Rule 2: Confirmation Alert before applying the change
+    // Confirmation Alert before applying the change
     Alert.alert(
       "Update Status",
       `Are you sure you want to update the order status to "${targetStage}"?`,
@@ -96,6 +100,44 @@ export default function OrderDetailScreen() {
             } catch (error) {
               console.error("Failed to update status:", error);
               Alert.alert("Error", "Failed to update order status.");
+            }
+          },
+        },
+      ],
+      { cancelable: true },
+    );
+  };
+
+  // Handle Order Deletion
+  const handleDeleteOrder = () => {
+    if (!order) return;
+
+    Alert.alert(
+      "Delete Order",
+      `Are you sure you want to delete Order #${order.id}? This action cannot be undone.`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            setIsDeleting(true);
+            try {
+              await orderRepository.deleteOrder(db, order.id);
+              Alert.alert("Success", "Order deleted successfully.", [
+                {
+                  text: "OK",
+                  onPress: () => router.back(),
+                },
+              ]);
+            } catch (error) {
+              console.error("Failed to delete order:", error);
+              Alert.alert("Error", "Failed to delete order.");
+            } finally {
+              setIsDeleting(false);
             }
           },
         },
@@ -179,6 +221,16 @@ export default function OrderDetailScreen() {
           isDelivered={order.status === "Delivered"}
         />
       </ScrollView>
+
+      {/* Component 4: Delete Order Button */}
+      <TouchableOpacity
+        style={[styles.deleteButton, { backgroundColor: theme.colors.error }]}
+        onPress={handleDeleteOrder}
+        disabled={isDeleting}
+        activeOpacity={0.8}
+      >
+        <Entypo name="trash" size={24} color={theme.colors.text} />
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -201,5 +253,15 @@ const styles = StyleSheet.create({
   paymentTitle: {
     letterSpacing: 0.8,
     marginBottom: Metrics.margin.md,
+  },
+  deleteButton: {
+    width: Metrics.width.lg,
+    height: Metrics.height.xl,
+    position: "absolute",
+    bottom: "10%",
+    right: Metrics.margin.xxl,
+    borderRadius: Metrics.radius.circle,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

@@ -180,4 +180,19 @@ export const orderRepository = {
       [cid],
     );
   },
+
+  // Delete an order and its associated status history
+  async deleteOrder(db: SQLiteDatabase, orderId: number): Promise<boolean> {
+    const id = Number(orderId);
+    if (!id || Number.isNaN(id)) return false;
+
+    await db.withExclusiveTransactionAsync(async (txn) => {
+      // Delete status history first (due to foreign key relation)
+      await txn.runAsync(`DELETE FROM order_status WHERE order_id = ?`, [id]);
+      // Delete the order record
+      await txn.runAsync(`DELETE FROM orders WHERE id = ?`, [id]);
+    });
+
+    return true;
+  },
 };
