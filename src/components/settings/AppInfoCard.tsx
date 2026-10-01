@@ -1,4 +1,5 @@
 import Typography from "@/components/text/typography";
+import { appVersion } from "@/constants/appInfo";
 import { Metrics } from "@/constants/metrics";
 import { useAppTheme } from "@/theme";
 import React from "react";
@@ -11,7 +12,7 @@ interface AppInfoCardProps {
 }
 
 const AppInfoCard: React.FC<AppInfoCardProps> = ({
-  version = "1.0.0",
+  version = appVersion,
   storageType = "Offline (SQLite Local)",
 }) => {
   const { theme } = useAppTheme();
