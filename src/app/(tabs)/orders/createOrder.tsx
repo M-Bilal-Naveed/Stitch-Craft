@@ -14,12 +14,11 @@ import { Customer } from "@/types/customer";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-  Alert,
   SafeAreaView,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 
 export default function CreateOrderScreen() {
@@ -56,15 +55,13 @@ export default function CreateOrderScreen() {
   };
 
   const handleCreateOrder = async () => {
-    if (!selectedCustomer?.id) {
-      Alert.alert("Validation Error", "Please select a customer.");
-      return;
-    }
-
-    const formattedDate = deliveryDate.toISOString().split("T")[0];
+    const formattedDate = deliveryDate
+      ? deliveryDate.toISOString().split("T")[0]
+      : "";
+    const customerId = selectedCustomer?.id ?? 0;
 
     const success = await addOrder({
-      customer_id: selectedCustomer.id,
+      customer_id: customerId,
       cloth_type: clothingType,
       delivery_date: formattedDate,
       total_price: total,
@@ -74,12 +71,7 @@ export default function CreateOrderScreen() {
     });
 
     if (success) {
-      Alert.alert("Success", "Order created successfully!", [
-        {
-          text: "OK",
-          onPress: () => router.back(),
-        },
-      ]);
+      router.back();
     }
   };
 
