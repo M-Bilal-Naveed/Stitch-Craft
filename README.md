@@ -4,6 +4,8 @@ Stitch Craft is a fully offline React Native + Expo mobile application built spe
 
 It uses SQLite for local data storage and authentication, allowing shop owners to manage their customers, measurements, orders, payments, and stitching progress without requiring an internet connection.
 
+Also have the features like add the customers, add their measurements , create orders, update order status, add the user payment, update measurements, delete the customers and delete orders.
+
 ✨ Features
 
 📱 Built with React Native & Expo
@@ -103,15 +105,14 @@ Orders can be created for individual customers and tracked throughout the tailor
 Each order can have a current status such as:
 
 Pending
-   ↓
+↓
 Cutting
-   ↓
+↓
 Stitching
-   ↓
+↓
 Ready
-   ↓
+↓
 Delivery
-
 
 This allows the tailor to quickly see where an order currently stands.
 
@@ -189,7 +190,6 @@ Watch the Stitch Craft app in action:
 
 ▶️ App Video Preview:
 
-
 https://github.com/user-attachments/assets/e5edcbea-216a-4f01-9f07-e5783e6f1702
 
 📦 EAS Build
@@ -200,7 +200,6 @@ The application is built using Expo Application Services (EAS).
 https://expo.dev/accounts/m_bilal_naveed/projects/stitchcraft/builds/21d9d1b9-fa9a-48d8-b5d9-d39a69229a25
 
 <img width="309" height="344" alt="QRcode" src="https://github.com/user-attachments/assets/d9a10c41-7dec-4598-aa67-949298aa5acd" />
-
 
 🚀 Getting Started
 Prerequisites
@@ -221,21 +220,17 @@ Clone the repository:
 
 git clone YOUR_REPOSITORY_URL
 
-
 Navigate to the project:
 
 cd stitch-craft
-
 
 Install dependencies:
 
 npm install
 
-
 Start the Expo development server:
 
 npx expo start
-
 
 You can then run the application using:
 
@@ -254,11 +249,11 @@ The main purpose of Stitch Craft is to provide tailor shops with a simple, fast,
 The application focuses on four core areas:
 
 Customers
-    ↓
+↓
 Measurements
-    ↓
+↓
 Orders
-    ↓
+↓
 Payments & Delivery
 
 🔮 Future Improvements
